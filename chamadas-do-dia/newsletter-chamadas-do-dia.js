@@ -403,19 +403,35 @@ async function main() {
 		console.log(`  Erro ao buscar ultimo envio (${err.message}). Usando ultimas 24h.\n`)
 	}
 
-	// --- 3. Buscar posts publicados desde o ultimo envio ---
+	// --- 3. Buscar posts publicados (ou agendados antes do envio) desde o ultimo envio ---
 	console.log('[3/6] Buscando posts publicados desde o ultimo envio...')
 
-	const filter = `status:published+published_at:>'${sinceDate}'+tag:-${tagSlug}`
-	const postsResult = await ghostGet(
-		`posts/?filter=${encodeURIComponent(
-			filter
-		)}&order=published_at%20desc&limit=50&formats=lexical&include=tags`,
-		apiKey
-	)
+	// Horario de envio da newsletter — posts agendados antes desse momento ja estarao
+	// publicados quando a newsletter for enviada, entao devem ser incluidos.
+	const sendTimeISO = getScheduledDate()
 
-	const publishedPosts = postsResult.posts || []
-	console.log(`  Encontrados: ${publishedPosts.length} post(s)\n`)
+	const filterPublished = `status:published+published_at:>'${sinceDate}'+tag:-${tagSlug}`
+	const filterScheduled = `status:scheduled+published_at:>'${sinceDate}'+published_at:<'${sendTimeISO}'+tag:-${tagSlug}`
+
+	const [publishedResult, scheduledResult] = await Promise.all([
+		ghostGet(
+			`posts/?filter=${encodeURIComponent(filterPublished)}&order=published_at%20desc&limit=50&formats=lexical&include=tags`,
+			apiKey
+		),
+		ghostGet(
+			`posts/?filter=${encodeURIComponent(filterScheduled)}&order=published_at%20desc&limit=50&formats=lexical&include=tags`,
+			apiKey
+		),
+	])
+
+	const publishedPosts = [
+		...(publishedResult.posts || []),
+		...(scheduledResult.posts || []),
+	].sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
+
+	console.log(
+		`  Encontrados: ${publishedResult.posts?.length || 0} publicado(s) + ${scheduledResult.posts?.length || 0} agendado(s) = ${publishedPosts.length} total\n`
+	)
 
 	if (publishedPosts.length === 0) {
 		console.log('  Nao ha posts novos desde o ultimo envio. Nada a fazer.\n')
