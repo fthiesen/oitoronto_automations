@@ -1,0 +1,19 @@
+name: Newsletter Chamadas do Dia
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  newsletter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: cd chamadas-do-dia && npm install
+      - run: cd chamadas-do-dia && node newsletter-chamadas-do-dia.js
+        env:
+          GHOST_ADMIN_API_KEY: ${{ secrets.GHOST_ADMIN_API_KEY }}
