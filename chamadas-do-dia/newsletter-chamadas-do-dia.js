@@ -34,7 +34,7 @@ const SCHEDULE_TIME = '07:10'
 const TIMEZONE = 'America/Toronto'
 
 // Numero de paragrafos iniciais da materia a incluir no resumo
-const NUM_PARAGRAPHS = 3
+const NUM_PARAGRAPHS = 1
 
 // Prefixo do titulo da newsletter
 const TITLE_PREFIX = 'Chamadas do Dia'
@@ -206,7 +206,7 @@ function makeHeadingNode(text) {
 		indent: 0,
 		type: 'extended-heading',
 		version: 1,
-		tag: 'h2',
+		tag: 'h3',
 	}
 }
 
@@ -261,7 +261,7 @@ function buildNewsletterLexical(articles) {
 			children.push(makeImageNode(article.featuredImage, article.title))
 		}
 
-		// Titulo como H2
+		// Titulo como H3
 		children.push(makeHeadingNode(article.title))
 
 		// Paragrafo resumo
@@ -269,18 +269,18 @@ function buildNewsletterLexical(articles) {
 			children.push(makeParagraphNode(article.summary))
 		}
 
+		// Botao "Leia Mais"
+		children.push(makeButtonNode('Leia na Íntegra', article.url))
+
 		// Card CTA do anunciante
 		if (article.ctaCard) {
 			children.push(article.ctaCard)
 		}
 
-		// Botao "Leia Mais"
-		children.push(makeButtonNode('Leia Mais', article.url))
-
 		// Divider entre materias (exceto apos a ultima)
-		if (index < articles.length - 1) {
-			children.push(makeDividerNode())
-		}
+		// if (index < articles.length - 1) {
+		// 	children.push(makeDividerNode())
+		// }
 	})
 
 	return JSON.stringify({
@@ -415,22 +415,27 @@ async function main() {
 
 	const [publishedResult, scheduledResult] = await Promise.all([
 		ghostGet(
-			`posts/?filter=${encodeURIComponent(filterPublished)}&order=published_at%20desc&limit=50&formats=lexical&include=tags`,
+			`posts/?filter=${encodeURIComponent(
+				filterPublished
+			)}&order=published_at%20desc&limit=50&formats=lexical&include=tags`,
 			apiKey
 		),
 		ghostGet(
-			`posts/?filter=${encodeURIComponent(filterScheduled)}&order=published_at%20desc&limit=50&formats=lexical&include=tags`,
+			`posts/?filter=${encodeURIComponent(
+				filterScheduled
+			)}&order=published_at%20desc&limit=50&formats=lexical&include=tags`,
 			apiKey
 		),
 	])
 
-	const publishedPosts = [
-		...(publishedResult.posts || []),
-		...(scheduledResult.posts || []),
-	].sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
+	const publishedPosts = [...(publishedResult.posts || []), ...(scheduledResult.posts || [])].sort(
+		(a, b) => new Date(b.published_at) - new Date(a.published_at)
+	)
 
 	console.log(
-		`  Encontrados: ${publishedResult.posts?.length || 0} publicado(s) + ${scheduledResult.posts?.length || 0} agendado(s) = ${publishedPosts.length} total\n`
+		`  Encontrados: ${publishedResult.posts?.length || 0} publicado(s) + ${
+			scheduledResult.posts?.length || 0
+		} agendado(s) = ${publishedPosts.length} total\n`
 	)
 
 	if (publishedPosts.length === 0) {
@@ -531,4 +536,3 @@ main().catch(err => {
 	if (err.stack) console.error(err.stack)
 	process.exit(1)
 })
-
