@@ -1,0 +1,16 @@
+{
+	"name": "ghost-schedule-newsletter",
+	"version": "1.0.0",
+	"description": "Agenda posts do Ghost como newsletter Novidades do Blog",
+	"main": "schedule-newsletter.js",
+	"scripts": {
+		"schedule": "node schedule-newsletter.js"
+	},
+	"dependencies": {
+		"dotenv": "^16.0.0"
+	},
+	"optionalDependencies": {
+		"jsonwebtoken": "^9.0.0"
+	}
+}
+

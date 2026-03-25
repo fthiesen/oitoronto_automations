@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * newsletter-chamadas-do-dia.js
+ * newsletter-novidades-do-blog.js
  *
- * Gera e agenda automaticamente a newsletter "Chamadas do Dia" no Ghost.
+ * Gera e agenda automaticamente a newsletter "Novidades do Blog" no Ghost.
  *
  * O script:
  *   1. Conecta na Ghost Admin API via JWT
@@ -14,7 +14,7 @@
  *
  * Dependencias: nenhuma externa (usa crypto e fetch nativos do Node 18+)
  *
- * Uso: node newsletter-chamadas-do-dia.js
+ * Uso: node newsletter-novidades-do-blog.js
  */
 
 const crypto = require('crypto')
@@ -37,7 +37,7 @@ const TIMEZONE = 'America/Toronto'
 const NUM_PARAGRAPHS = 1
 
 // Prefixo do titulo da newsletter
-const TITLE_PREFIX = 'Chamadas do Dia'
+const TITLE_PREFIX = 'Novidades do Blog'
 
 // ============================================================
 // 2. JWT — Autenticacao Ghost Admin API
@@ -369,7 +369,7 @@ function formatNewsletterTitle() {
 // ============================================================
 
 async function main() {
-	console.log('\n=== Newsletter Chamadas do Dia ===\n')
+	console.log('\n=== Newsletter Novidades do Blog ===\n')
 
 	// --- 1. Obter API key ---
 	console.log('[1/6] Obtendo API key...')
