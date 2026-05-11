@@ -1,10 +1,8 @@
 name: Newsletter Novidades do Blog
-
+# Agendamento gerenciado pelo cron-job.org (newsletter-novidades-do-blog)
+# https://cron-job.org/en/members/jobs/
 on:
-  schedule:
-    - cron: '0 8 * * *'
   workflow_dispatch:
-
 jobs:
   newsletter:
     runs-on: ubuntu-latest
