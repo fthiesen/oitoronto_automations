@@ -346,17 +346,16 @@ function getScheduledDate() {
 // 7. Formatacao do titulo
 // ============================================================
 
-function formatNewsletterTitle() {
+function formatNewsletterTitle(scheduledDate) {
 	const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-	const now = new Date()
+	const date = new Date(scheduledDate)
 
-	// Usa o fuso configurado para determinar a data local
 	const parts = new Intl.DateTimeFormat('en-CA', {
 		timeZone: TIMEZONE,
 		year: 'numeric',
 		month: '2-digit',
 		day: '2-digit',
-	}).format(now)
+	}).format(date)
 
 	const [year, month, day] = parts.split('-')
 	const mesAbrev = meses[parseInt(month, 10) - 1]
@@ -408,10 +407,10 @@ async function main() {
 
 	// Horario de envio da newsletter — posts agendados antes desse momento ja estarao
 	// publicados quando a newsletter for enviada, entao devem ser incluidos.
-	const sendTimeISO = getScheduledDate()
+	const publishedAt = getScheduledDate()
 
 	const filterPublished = `status:published+published_at:>'${sinceDate}'+tag:-${tagSlug}`
-	const filterScheduled = `status:scheduled+published_at:>'${sinceDate}'+published_at:<'${sendTimeISO}'+tag:-${tagSlug}`
+	const filterScheduled = `status:scheduled+published_at:>'${sinceDate}'+published_at:<'${publishedAt}'+tag:-${tagSlug}`
 
 	const [publishedResult, scheduledResult] = await Promise.all([
 		ghostGet(
@@ -469,7 +468,7 @@ async function main() {
 	// --- 5. Criar post draft com conteudo Lexical ---
 	console.log('[5/6] Criando post draft da newsletter...')
 
-	const newsletterTitle = formatNewsletterTitle()
+	const newsletterTitle = formatNewsletterTitle(publishedAt)
 	const lexicalContent = buildNewsletterLexical(articles)
 
 	const createResult = await ghostPost(
@@ -495,8 +494,6 @@ async function main() {
 
 	// --- 6. Agendar como email-only via newsletter ---
 	console.log('[6/6] Agendando envio via newsletter...')
-
-	const publishedAt = getScheduledDate()
 
 	const scheduleResult = await ghostPut(
 		`posts/${draftPost.id}/?newsletter=${NEWSLETTER_SLUG}`,
