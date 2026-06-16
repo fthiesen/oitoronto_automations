@@ -2,7 +2,7 @@ name: Update Stats Dashboard
 
 on:
   schedule:
-    - cron: '0 14 * * *'  # todo dia às 9h Toronto (UTC-5)
+    - cron: '0 5 * * *' # todo dia à meia-noite Toronto (UTC-5)
   workflow_dispatch:
 
 jobs:
@@ -36,83 +36,4 @@ jobs:
             const [id, secret] = apiKey.split(':');
             const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT', kid: id })).toString('base64url');
             const now = Math.floor(Date.now() / 1000);
-            const payload = Buffer.from(JSON.stringify({ iat: now, exp: now + 300, aud: '/admin/' })).toString('base64url');
-            const signature = createHmac('sha256', Buffer.from(secret, 'hex'))
-              .update(`${header}.${payload}`)
-              .digest('base64url');
-            return `${header}.${payload}.${signature}`;
-          }
-
-          async function ghostRequest(endpoint) {
-            const token = generateToken(GHOST_ADMIN_API_KEY);
-            const res = await fetch(`${GHOST_URL}/ghost/api/admin/${endpoint}`, {
-              headers: { Authorization: `Ghost ${token}` }
-            });
-            if (!res.ok) throw new Error(`Ghost API error: ${res.status} - ${await res.text()}`);
-            return res.json();
-          }
-
-          function getToday() {
-            const now = new Date();
-            return now.toISOString().split('T')[0];
-          }
-
-          async function main() {
-            const today = getToday();
-            const cutoff = new Date(today);
-            cutoff.setDate(cutoff.getDate() - 90);
-            const cutoffStr = cutoff.toISOString().split('T')[0];
-
-            console.log(`Data: ${today} | Janela ativa: desde ${cutoffStr}`);
-
-            const [allMembers, activeMembers, integraMembers, novidadesMembers] = await Promise.all([
-              ghostRequest('members/?limit=1&fields=id'),
-              ghostRequest(`members/?limit=1&fields=id&filter=last_seen_at:>'${cutoffStr}'`),
-              ghostRequest('members/?limit=1&fields=id&filter=newsletters.id:66cb7d112ed5a30008ef547f'),
-              ghostRequest('members/?limit=1&fields=id&filter=newsletters.id:69b841028d92730001ef15d2'),
-            ]);
-
-            const total = allMembers.meta.pagination.total;
-            const ativos = activeMembers.meta.pagination.total;
-            const integra = integraMembers.meta.pagination.total;
-            const novidades = novidadesMembers.meta.pagination.total;
-            const newsletters = integra + novidades;
-
-            const newEntry = { date: today, ativos, total, newsletters, integra, novidades };
-            console.log('Dados coletados:', newEntry);
-
-            const dataPath = './stats-dashboard/public/data.json';
-            const existing = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-            const alreadyExists = existing.some(d => d.date === today);
-
-            if (!alreadyExists) {
-              existing.push(newEntry);
-              fs.writeFileSync(dataPath, JSON.stringify(existing, null, 2));
-              console.log('data.json atualizado com sucesso.');
-            } else {
-              console.log('Entrada para hoje já existe, pulando.');
-            }
-          }
-
-          main().catch(e => { console.error(e); process.exit(1); });
-          SCRIPT
-
-      - name: Commit updated data.json
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add stats-dashboard/public/data.json
-          git diff --cached --quiet || git commit -m "stats: atualiza dados de $(date +'%d/%m/%Y')"
-          git push
-
-      - name: Install dependencies and build
-        working-directory: stats-dashboard
-        run: |
-          npm ci
-          npm run build
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./stats-dashboard/dist
+            const payload =
