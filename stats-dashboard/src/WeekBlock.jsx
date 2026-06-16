@@ -3,7 +3,7 @@ import { shortLabel } from './App'
 export default function WeekBlock({ data, prev, metrics }) {
   return (
     <div style={{ marginBottom: '1rem' }}>
-      <p style={{ fontSize: '11px', color: '#999', marginBottom: '8px' }}>{shortLabel(data.monday)}</p>
+      <p style={{ fontSize: '11px', color: '#999', marginBottom: '8px' }}>{shortLabel(data.date)}</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '8px' }}>
         {metrics.map(m => {
           const val = data[m.key]

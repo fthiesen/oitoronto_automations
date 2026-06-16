@@ -1,18 +1,10 @@
 [
   {
-    "monday": "2026-06-08",
+    "date": "2026-06-16",
     "ativos": 1498,
     "total": 2270,
     "newsletters": 1764,
     "integra": 1614,
     "novidades": 150
-  },
-  {
-    "monday": "2026-06-15",
-    "ativos": 1520,
-    "total": 2301,
-    "newsletters": 1793,
-    "integra": 1613,
-    "novidades": 180
   }
 ]

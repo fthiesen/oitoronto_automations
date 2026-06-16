@@ -2,7 +2,7 @@ name: Update Stats Dashboard
 
 on:
   schedule:
-    - cron: '0 14 * * 1'  # toda segunda-feira às 9h Toronto (UTC-5)
+    - cron: '0 14 * * *'  # todo dia às 9h Toronto (UTC-5)
   workflow_dispatch:
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
           GHOST_URL: https://oitoronto.ghost.io
           GHOST_ADMIN_API_KEY: ${{ secrets.GHOST_ADMIN_API_KEY }}
         run: |
-          node - <<'EOF'
+          node - <<'SCRIPT'
           const { createHmac } = require('crypto');
           const fs = require('fs');
 
@@ -52,22 +52,18 @@ jobs:
             return res.json();
           }
 
-          function getThisMonday() {
+          function getToday() {
             const now = new Date();
-            const day = now.getDay();
-            const diff = day === 0 ? -6 : 1 - day;
-            const monday = new Date(now);
-            monday.setDate(now.getDate() + diff);
-            return monday.toISOString().split('T')[0];
+            return now.toISOString().split('T')[0];
           }
 
           async function main() {
-            const monday = getThisMonday();
-            const cutoff = new Date(monday);
+            const today = getToday();
+            const cutoff = new Date(today);
             cutoff.setDate(cutoff.getDate() - 90);
             const cutoffStr = cutoff.toISOString().split('T')[0];
 
-            console.log(`Semana: ${monday} | Janela ativa: desde ${cutoffStr}`);
+            console.log(`Data: ${today} | Janela ativa: desde ${cutoffStr}`);
 
             const [allMembers, activeMembers, integraMembers, novidadesMembers] = await Promise.all([
               ghostRequest('members/?limit=1&fields=id'),
@@ -82,31 +78,31 @@ jobs:
             const novidades = novidadesMembers.meta.pagination.total;
             const newsletters = integra + novidades;
 
-            const newEntry = { monday, ativos, total, newsletters, integra, novidades };
+            const newEntry = { date: today, ativos, total, newsletters, integra, novidades };
             console.log('Dados coletados:', newEntry);
 
             const dataPath = './stats-dashboard/public/data.json';
             const existing = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-            const alreadyExists = existing.some(d => d.monday === monday);
+            const alreadyExists = existing.some(d => d.date === today);
 
             if (!alreadyExists) {
               existing.push(newEntry);
               fs.writeFileSync(dataPath, JSON.stringify(existing, null, 2));
               console.log('data.json atualizado com sucesso.');
             } else {
-              console.log('Entrada para esta semana já existe, pulando.');
+              console.log('Entrada para hoje já existe, pulando.');
             }
           }
 
           main().catch(e => { console.error(e); process.exit(1); });
-          EOF
+          SCRIPT
 
       - name: Commit updated data.json
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add stats-dashboard/public/data.json
-          git diff --cached --quiet || git commit -m "stats: atualiza dados da semana $(date +'%d/%m/%Y')"
+          git diff --cached --quiet || git commit -m "stats: atualiza dados de $(date +'%d/%m/%Y')"
           git push
 
       - name: Install dependencies and build

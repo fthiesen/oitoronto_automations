@@ -15,7 +15,7 @@ export default function StatsChart({ slice, metrics }) {
     instance.current = new Chart(ref.current, {
       type: 'line',
       data: {
-        labels: slice.map(d => shortLabel(d.monday)),
+        labels: slice.map(d => shortLabel(d.date)),
         datasets: [
           { label: 'Membros ativos', data: slice.map(d => d.ativos), borderColor: '#2bc700', backgroundColor: 'rgba(43,199,0,0.07)', borderWidth: 2.5, pointRadius: 4, fill: true, tension: 0.3 },
           { label: 'Total de membros', data: slice.map(d => d.total), borderColor: '#888780', borderWidth: 1.5, pointRadius: 3, fill: false, tension: 0.3, borderDash: [2,5] },

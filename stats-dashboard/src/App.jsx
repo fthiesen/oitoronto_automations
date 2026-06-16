@@ -23,7 +23,6 @@ export default function App() {
   const [data, setData] = useState([])
   const [from, setFrom] = useState(0)
   const [to, setTo] = useState(0)
-  const [applied, setApplied] = useState({ from: 0, to: 0 })
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -33,7 +32,6 @@ export default function App() {
         setData(d)
         setFrom(0)
         setTo(d.length - 1)
-        setApplied({ from: 0, to: d.length - 1 })
       })
       .catch(() => setError('Não foi possível carregar os dados.'))
   }, [])
@@ -41,42 +39,44 @@ export default function App() {
   if (error) return <p style={{ color: '#e02b20', padding: '2rem' }}>{error}</p>
   if (!data.length) return <p style={{ padding: '2rem', color: '#888' }}>Carregando...</p>
 
-  const slice = data.slice(applied.from, applied.to + 1)
+  const slice = data.slice(from, to + 1)
 
   return (
     <div>
       <div style={{ marginBottom: '1.5rem' }}>
         <h1 style={{ fontSize: '18px', fontWeight: 500, marginBottom: '0.25rem' }}>OiToronto Stats</h1>
-        <p style={{ fontSize: '12px', color: '#888' }}>Atualizado toda segunda-feira</p>
+        <p style={{ fontSize: '12px', color: '#888' }}>Atualizado diariamente às 9h</p>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         <select
           value={from}
-          onChange={e => setFrom(parseInt(e.target.value))}
+          onChange={e => {
+            const val = parseInt(e.target.value)
+            setFrom(val)
+            if (val > to) setTo(val)
+          }}
           style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '6px', border: '0.5px solid #ccc', background: '#fff' }}
         >
-          {data.map((d, i) => <option key={i} value={i}>{shortLabel(d.monday)}</option>)}
+          {data.map((d, i) => <option key={i} value={i}>{shortLabel(d.date)}</option>)}
         </select>
         <span style={{ fontSize: '12px', color: '#888' }}>até</span>
         <select
           value={to}
-          onChange={e => setTo(parseInt(e.target.value))}
+          onChange={e => {
+            const val = parseInt(e.target.value)
+            setTo(val)
+            if (val < from) setFrom(val)
+          }}
           style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '6px', border: '0.5px solid #ccc', background: '#fff' }}
         >
-          {data.map((d, i) => <option key={i} value={i}>{shortLabel(d.monday)}</option>)}
+          {data.map((d, i) => <option key={i} value={i} disabled={i < from}>{shortLabel(d.date)}</option>)}
         </select>
-        <button
-          onClick={() => setApplied({ from, to })}
-          style={{ fontSize: '12px', padding: '4px 16px', borderRadius: '6px', border: '0.5px solid #ccc', background: '#fff', cursor: 'pointer', marginLeft: 'auto' }}
-        >
-          Atualizar
-        </button>
       </div>
 
       {slice.map((d, idx) => (
         <WeekBlock
-          key={d.monday}
+          key={d.date}
           data={d}
           prev={idx > 0 ? slice[idx - 1] : null}
           metrics={METRICS}
