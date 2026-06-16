@@ -45,7 +45,7 @@ export default function App() {
     <div>
       <div style={{ marginBottom: '1.5rem' }}>
         <h1 style={{ fontSize: '18px', fontWeight: 500, marginBottom: '0.25rem' }}>OiToronto Stats</h1>
-        <p style={{ fontSize: '12px', color: '#888' }}>Atualizado diariamente às 9h</p>
+        <p style={{ fontSize: '12px', color: '#888' }}>Atualizado diariamente à meia-noite</p>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
