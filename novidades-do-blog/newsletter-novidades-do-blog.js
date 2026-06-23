@@ -9,7 +9,8 @@
  *   1. Conecta na Ghost Admin API via JWT
  *   2. Identifica a data do ultimo envio pela tag #ChamadasDoDia
  *   3. Busca posts publicados desde entao
- *   4. Monta o conteudo Lexical com resumo de cada materia + CTA do anunciante
+ *   4. Monta o conteudo Lexical com resumo de cada materia + anuncio do patrocinador
+ *      (suporta card call-to-action nativo e HTML com data-ad)
  *   5. Cria o post como draft e agenda como email-only na newsletter
  *
  * Dependencias: nenhuma externa (usa crypto e fetch nativos do Node 18+)
@@ -156,13 +157,27 @@ function extractFirstParagraphs(lexicalRoot, count) {
 }
 
 /**
- * Encontra o primeiro card call-to-action (CTA do anunciante) no Lexical.
- * Retorna o bloco JSON inteiro ou null se nao encontrar.
+ * Encontra o card de anuncio do patrocinador no Lexical.
+ *
+ * Suporta dois formatos:
+ *   1. Card nativo "call-to-action" do Ghost (tipo antigo)
+ *   2. Card "html" contendo <div data-ad>...</div> (tipo novo, banner de imagem)
+ *
+ * Retorna o bloco JSON inteiro do no Lexical, ou null se nao encontrar.
  */
-function findCtaCard(lexicalRoot) {
+function findAdCard(lexicalRoot) {
 	const children = lexicalRoot?.root?.children || []
-	for (const child of children) {
+	// Anuncios aparecem apenas nos primeiros blocos do post (ate o 4o no).
+	// Apos isso, qualquer CTA encontrado e mensagem interna do blog, nao anuncio.
+	const limit = Math.min(children.length, 4)
+	for (let i = 0; i < limit; i++) {
+		const child = children[i]
+		// Formato 1: card nativo call-to-action
 		if (child.type === 'call-to-action') {
+			return child
+		}
+		// Formato 2: bloco HTML com marcador data-ad
+		if (child.type === 'html' && typeof child.html === 'string' && child.html.includes('data-ad')) {
 			return child
 		}
 	}
@@ -249,7 +264,7 @@ function makeDividerNode() {
  * Monta o JSON Lexical completo da newsletter a partir dos dados das materias.
  *
  * @param {Array} articles — Array de objetos com:
- *   { title, featuredImage, summary, url, ctaCard }
+ *   { title, featuredImage, summary, url, adCard (call-to-action ou html com data-ad) }
  * @returns {string} JSON Lexical serializado
  */
 function buildNewsletterLexical(articles) {
@@ -273,8 +288,17 @@ function buildNewsletterLexical(articles) {
 		children.push(makeButtonNode('Leia na Íntegra', article.url))
 
 		// Card CTA do anunciante
-		if (article.ctaCard) {
-			children.push(article.ctaCard)
+		if (article.adCard) {
+			if (article.adCard.type === 'html') {
+				// Anuncio HTML (data-ad): wrapper com margem para igualar
+				// o espacamento do card call-to-action nativo
+				const styled = { ...article.adCard }
+				styled.html =
+					'<div style="margin-top:0;margin-bottom:1.5em">' + styled.html.trim() + '</div>'
+				children.push(styled)
+			} else {
+				children.push(article.adCard)
+			}
 		}
 
 		// Divider entre materias (exceto apos a ultima)
@@ -382,24 +406,31 @@ async function main() {
 	const tagSlug = 'hash-chamadasdodia'
 	let sinceDate
 
-	try {
-		const lastNewsletter = await ghostGet(
-			`posts/?filter=tag:${tagSlug}&order=published_at%20desc&limit=1&formats=lexical`,
-			apiKey
-		)
+	// Permite override via --since=YYYY-MM-DD para testes
+	const sinceArg = process.argv.find(a => a.startsWith('--since='))
+	if (sinceArg) {
+		sinceDate = new Date(sinceArg.split('=')[1]).toISOString()
+		console.log(`  Override via --since: ${sinceDate}\n`)
+	} else {
+		try {
+			const lastNewsletter = await ghostGet(
+				`posts/?filter=tag:${tagSlug}&order=published_at%20desc&limit=1&formats=lexical`,
+				apiKey
+			)
 
-		if (lastNewsletter.posts && lastNewsletter.posts.length > 0) {
-			const lastPost = lastNewsletter.posts[0]
-			sinceDate = lastPost.published_at || lastPost.created_at
-			console.log(`  Ultimo envio: "${lastPost.title}"`)
-			console.log(`  Data: ${sinceDate}\n`)
-		} else {
+			if (lastNewsletter.posts && lastNewsletter.posts.length > 0) {
+				const lastPost = lastNewsletter.posts[0]
+				sinceDate = lastPost.published_at || lastPost.created_at
+				console.log(`  Ultimo envio: "${lastPost.title}"`)
+				console.log(`  Data: ${sinceDate}\n`)
+			} else {
+				sinceDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+				console.log(`  Nenhum envio anterior encontrado. Usando ultimas 24h: ${sinceDate}\n`)
+			}
+		} catch (err) {
 			sinceDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-			console.log(`  Nenhum envio anterior encontrado. Usando ultimas 24h: ${sinceDate}\n`)
+			console.log(`  Erro ao buscar ultimo envio (${err.message}). Usando ultimas 24h.\n`)
 		}
-	} catch (err) {
-		sinceDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-		console.log(`  Erro ao buscar ultimo envio (${err.message}). Usando ultimas 24h.\n`)
 	}
 
 	// --- 3. Buscar posts publicados (ou agendados antes do envio) desde o ultimo envio ---
@@ -454,14 +485,14 @@ async function main() {
 		const title = post.title || '(sem titulo)'
 		const summary = lexical ? extractFirstParagraphs(lexical, NUM_PARAGRAPHS) : ''
 		const url = post.url || `${GHOST_URL}/${post.slug}/`
-		const ctaCard = lexical ? findCtaCard(lexical) : null
+		const adCard = lexical ? findAdCard(lexical) : null
 
-		articles.push({ title, featuredImage, summary, url, ctaCard })
+		articles.push({ title, featuredImage, summary, url, adCard })
 
 		console.log(`  - ${title}`)
 		console.log(`    Imagem: ${featuredImage ? 'sim' : 'nao'}`)
 		console.log(`    Resumo: ${summary.substring(0, 80)}...`)
-		console.log(`    CTA: ${ctaCard ? 'sim' : 'nao encontrado'}`)
+		console.log(`    Anuncio: ${adCard ? 'sim' : 'nao encontrado'}`)
 		console.log(`    URL: ${url}\n`)
 	}
 
@@ -533,3 +564,4 @@ main().catch(err => {
 	if (err.stack) console.error(err.stack)
 	process.exit(1)
 })
+
