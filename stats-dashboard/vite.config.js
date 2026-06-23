@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()],
-  base: '/oitoronto_automations/',
+	plugins: [react()],
+	base: '/oitoronto_automations/members-stats/',
 })
+

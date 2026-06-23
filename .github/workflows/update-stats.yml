@@ -2,7 +2,7 @@ name: Update Stats Dashboard
 
 on:
   schedule:
-    - cron: '0 5 * * *'  # todo dia à meia-noite Toronto (UTC-5)
+    - cron: '0 5 * * *' # todo dia à meia-noite Toronto (UTC-5)
   workflow_dispatch:
 
 jobs:
@@ -111,8 +111,11 @@ jobs:
           npm ci
           npm run build
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages subpath
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./stats-dashboard/dist
+          destination_dir: members-stats
+          keep_files: true
+
