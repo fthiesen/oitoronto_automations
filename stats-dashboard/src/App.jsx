@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import StatsChart from './StatsChart'
-import WeekBlock from './WeekBlock'
+import ComparisonBlock from './WeekBlock'
 
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
 
@@ -12,11 +12,29 @@ export function shortLabel(dateStr) {
 }
 
 export const METRICS = [
-	{ key: 'ativos', label: 'Membros ativos', color: '#2bc700', textColor: '#1e8a00' },
-	{ key: 'total', label: 'Total de membros', color: '#888780', textColor: '#5F5E5A' },
-	{ key: 'newsletters', label: 'Total newsletters', color: '#e02b20', textColor: '#a31e16' },
-	{ key: 'integra', label: 'Leitura na Íntegra', color: '#ff7b00', textColor: '#b35600' },
-	{ key: 'novidades', label: 'Novidades do Blog', color: '#fac400', textColor: '#a07d00' },
+	{ key: 'total', label: 'Total de membros', color: '#6B6A63', lineColor: '#888780', thick: true },
+	{ key: 'ativos', label: 'Membros ativos', color: '#1e9e00', lineColor: '#2bc700', thick: true },
+	{
+		key: 'newsletters',
+		label: 'Membros em Newsletters',
+		color: '#2D7FFF',
+		lineColor: '#2D7FFF',
+		thick: false,
+	},
+	{
+		key: 'integra',
+		label: 'Membros - Leitura na Íntegra',
+		color: '#6c63d1',
+		lineColor: '#7F77DD',
+		thick: false,
+	},
+	{
+		key: 'novidades',
+		label: 'Membros - Novidades do Blog',
+		color: '#9579c2',
+		lineColor: '#B19CD9',
+		thick: false,
+	},
 ]
 
 export default function App() {
@@ -30,8 +48,10 @@ export default function App() {
 			.then(r => r.json())
 			.then(d => {
 				setData(d)
-				setFrom(0)
-				setTo(d.length - 1)
+				const lastIndex = d.length - 1
+				const sevenDaysAgoIndex = Math.max(0, lastIndex - 6)
+				setFrom(sevenDaysAgoIndex)
+				setTo(lastIndex)
 			})
 			.catch(() => setError('Não foi possível carregar os dados.'))
 	}, [])
@@ -42,7 +62,6 @@ export default function App() {
 	const slice = data.slice(from, to + 1)
 	const firstDay = slice[0]
 	const lastDay = slice[slice.length - 1]
-	const showComparison = slice.length > 1
 
 	return (
 		<div>
@@ -107,8 +126,7 @@ export default function App() {
 				</select>
 			</div>
 
-			<WeekBlock data={firstDay} prev={null} metrics={METRICS} />
-			{showComparison && <WeekBlock data={lastDay} prev={firstDay} metrics={METRICS} />}
+			<ComparisonBlock firstDay={firstDay} lastDay={lastDay} metrics={METRICS} />
 
 			<StatsChart slice={slice} metrics={METRICS} />
 
@@ -130,19 +148,10 @@ export default function App() {
 								y1='5'
 								x2='24'
 								y2='5'
-								stroke={m.color}
-								strokeWidth={m.key === 'ativos' ? 2.5 : m.key === 'total' ? 1.5 : 2}
-								strokeDasharray={
-									m.key === 'total'
-										? '2,4'
-										: m.key === 'newsletters'
-										? '8,4'
-										: m.key === 'ativos'
-										? undefined
-										: '5,4'
-								}
+								stroke={m.lineColor}
+								strokeWidth={m.thick ? 3 : 2}
 							/>
-							<circle cx='12' cy='5' r='3' fill={m.color} />
+							<circle cx='12' cy='5' r='3' fill={m.lineColor} />
 						</svg>
 						{m.label}
 					</span>
