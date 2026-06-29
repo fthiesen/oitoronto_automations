@@ -59,71 +59,87 @@ export default function App() {
 	if (error) return <p style={{ color: '#e02b20', padding: '2rem' }}>{error}</p>
 	if (!data.length) return <p style={{ padding: '2rem', color: '#888' }}>Carregando...</p>
 
+	const LEGACY_POSTS = 1605
 	const slice = data.slice(from, to + 1)
 	const firstDay = slice[0]
 	const lastDay = slice[slice.length - 1]
+	const ghostPosts = data[data.length - 1]?.posts
+	const totalPosts = ghostPosts != null ? LEGACY_POSTS + ghostPosts : null
 
 	return (
 		<div>
-			<div style={{ marginBottom: '1.5rem' }}>
-				<h1 style={{ fontSize: '18px', fontWeight: 500, marginBottom: '0.25rem' }}>
-					OiToronto Stats
-				</h1>
-				<p style={{ fontSize: '12px', color: '#888' }}>Atualizado diariamente à meia-noite</p>
-			</div>
-
-			<div
-				style={{
-					display: 'flex',
-					alignItems: 'center',
-					gap: '8px',
-					marginBottom: '1.5rem',
-					flexWrap: 'wrap',
-				}}
-			>
-				<select
-					value={from}
-					onChange={e => {
-						const val = parseInt(e.target.value)
-						setFrom(val)
-						if (val > to) setTo(val)
-					}}
-					style={{
-						fontSize: '12px',
-						padding: '4px 8px',
-						borderRadius: '6px',
-						border: '0.5px solid #ccc',
-						background: '#fff',
-					}}
-				>
-					{data.map((d, i) => (
-						<option key={i} value={i}>
-							{shortLabel(d.date)}
-						</option>
-					))}
-				</select>
-				<span style={{ fontSize: '12px', color: '#888' }}>até</span>
-				<select
-					value={to}
-					onChange={e => {
-						const val = parseInt(e.target.value)
-						setTo(val)
-						if (val < from) setFrom(val)
-					}}
-					style={{
-						fontSize: '12px',
-						padding: '4px 8px',
-						borderRadius: '6px',
-						border: '0.5px solid #ccc',
-						background: '#fff',
-					}}
-				>
-					{data.map((d, i) => (
-						<option key={i} value={i} disabled={i < from}>
-							{shortLabel(d.date)}
-						</option>
-					))}
-				</select>
+			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+				<div>
+					<h1 style={{ fontSize: '18px', fontWeight: 500, marginBottom: '0.25rem' }}>
+						OiToronto Stats
+					</h1>
+					<p style={{ fontSize: '12px', color: '#888', marginBottom: '0.75rem' }}>Atualizado diariamente à meia-noite</p>
+					<div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+						<select
+							value={from}
+							onChange={e => {
+								const val = parseInt(e.target.value)
+								setFrom(val)
+								if (val > to) setTo(val)
+							}}
+							style={{
+								fontSize: '12px',
+								padding: '4px 8px',
+								borderRadius: '6px',
+								border: '0.5px solid #ccc',
+								background: '#fff',
+							}}
+						>
+							{data.map((d, i) => (
+								<option key={i} value={i}>
+									{shortLabel(d.date)}
+								</option>
+							))}
+						</select>
+						<span style={{ fontSize: '12px', color: '#888' }}>até</span>
+						<select
+							value={to}
+							onChange={e => {
+								const val = parseInt(e.target.value)
+								setTo(val)
+								if (val < from) setFrom(val)
+							}}
+							style={{
+								fontSize: '12px',
+								padding: '4px 8px',
+								borderRadius: '6px',
+								border: '0.5px solid #ccc',
+								background: '#fff',
+							}}
+						>
+							{data.map((d, i) => (
+								<option key={i} value={i} disabled={i < from}>
+									{shortLabel(d.date)}
+								</option>
+							))}
+						</select>
+					</div>
+				</div>
+				{totalPosts != null && (
+					<div
+						style={{
+							borderRadius: '8px',
+							padding: '0.75rem 1rem',
+							background: '#c0392b',
+							color: '#fff',
+							textAlign: 'right',
+							flexShrink: 0,
+						}}
+					>
+						<p style={{ fontSize: '11px', margin: '0 0 4px', opacity: 0.9 }}>Posts publicados desde 2009</p>
+						<p style={{ fontSize: '18px', fontWeight: 600, margin: '0 0 3px' }}>
+							{totalPosts.toLocaleString('pt-BR')}
+						</p>
+						<p style={{ fontSize: '11px', margin: 0, opacity: 0.7 }}>
+							1.605 + {ghostPosts.toLocaleString('pt-BR')}
+						</p>
+					</div>
+				)}
 			</div>
 
 			<ComparisonBlock firstDay={firstDay} lastDay={lastDay} metrics={METRICS} />

@@ -65,11 +65,12 @@ jobs:
 
             console.log(`Data: ${today} | Janela ativa: desde ${cutoffStr}`);
 
-            const [allMembers, activeMembers, integraMembers, novidadesMembers] = await Promise.all([
+            const [allMembers, activeMembers, integraMembers, novidadesMembers, publishedPosts] = await Promise.all([
               ghostRequest('members/?limit=1&fields=id'),
               ghostRequest(`members/?limit=1&fields=id&filter=last_seen_at:>'${cutoffStr}'`),
               ghostRequest('members/?limit=1&fields=id&filter=newsletters.id:66cb7d112ed5a30008ef547f'),
               ghostRequest('members/?limit=1&fields=id&filter=newsletters.id:69b841028d92730001ef15d2'),
+              ghostRequest('posts/?limit=1&fields=id&filter=status:published'),
             ]);
 
             const total = allMembers.meta.pagination.total;
@@ -77,8 +78,9 @@ jobs:
             const integra = integraMembers.meta.pagination.total;
             const novidades = novidadesMembers.meta.pagination.total;
             const newsletters = integra + novidades;
+            const posts = publishedPosts.meta.pagination.total;
 
-            const newEntry = { date: today, ativos, total, newsletters, integra, novidades };
+            const newEntry = { date: today, ativos, total, newsletters, integra, novidades, posts };
             console.log('Dados coletados:', newEntry);
 
             const dataPath = './stats-dashboard/public/data.json';
