@@ -22,6 +22,7 @@ jobs:
 
       - name: Fetch current data.json from gh-pages
         run: |
+          mkdir -p stats-dashboard/public
           curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/data.json" \
             -o stats-dashboard/public/data.json || echo "[]" > stats-dashboard/public/data.json
 
