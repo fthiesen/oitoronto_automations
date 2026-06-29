@@ -91,15 +91,14 @@ jobs:
 
             const dataPath = './stats-dashboard/public/data.json';
             const existing = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-            const alreadyExists = existing.some(d => d.date === today);
-
-            if (!alreadyExists) {
+            const existingIndex = existing.findIndex(d => d.date === today);
+            if (existingIndex === -1) {
               existing.push(newEntry);
-              fs.writeFileSync(dataPath, JSON.stringify(existing, null, 2));
-              console.log('data.json atualizado com sucesso.');
             } else {
-              console.log('Entrada para hoje já existe, pulando.');
+              existing[existingIndex] = newEntry;
             }
+            fs.writeFileSync(dataPath, JSON.stringify(existing, null, 2));
+            console.log('data.json atualizado com sucesso.');
           }
 
           main().catch(e => { console.error(e); process.exit(1); });
