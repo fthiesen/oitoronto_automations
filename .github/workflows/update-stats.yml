@@ -20,6 +20,11 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Fetch current data.json from gh-pages
+        run: |
+          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/data.json" \
+            -o stats-dashboard/public/data.json || echo "[]" > stats-dashboard/public/data.json
+
       - name: Fetch Ghost data and update data.json
         env:
           GHOST_URL: https://oitoronto.ghost.io
@@ -98,14 +103,6 @@ jobs:
 
           main().catch(e => { console.error(e); process.exit(1); });
           SCRIPT
-
-      - name: Commit updated data.json
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add stats-dashboard/public/data.json
-          git diff --cached --quiet || git commit -m "stats: atualiza dados de $(date +'%d/%m/%Y')"
-          git push
 
       - name: Install dependencies and build
         working-directory: stats-dashboard
