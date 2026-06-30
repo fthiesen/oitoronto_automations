@@ -137,7 +137,7 @@ export default function App() {
 							{totalPosts.toLocaleString('pt-BR')}
 						</p>
 						<p style={{ fontSize: '11px', margin: 0, opacity: 0.7 }}>
-							1.605 + {ghostPosts.toLocaleString('pt-BR')}
+							1.605 (OiCanadá) + {ghostPosts.toLocaleString('pt-BR')}
 						</p>
 					</div>
 				)}
