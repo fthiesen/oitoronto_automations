@@ -1,0 +1,42 @@
+name: Deploy Stats Dashboard
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'stats-dashboard/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch current data files from gh-pages
+        run: |
+          mkdir -p stats-dashboard/public
+          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/data.json" \
+            -o stats-dashboard/public/data.json || echo "[]" > stats-dashboard/public/data.json
+          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/signups-by-tag.json" \
+            -o stats-dashboard/public/signups-by-tag.json || echo "[]" > stats-dashboard/public/signups-by-tag.json
+
+      - name: Install dependencies and build
+        working-directory: stats-dashboard
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to GitHub Pages subpath
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./stats-dashboard/dist
+          destination_dir: members-stats
+          keep_files: true
