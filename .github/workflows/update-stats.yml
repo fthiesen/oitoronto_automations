@@ -148,7 +148,6 @@ jobs:
           async function main() {
             const today = new Date().toISOString().split('T')[0];
             const todayStart = `${today}T00:00:00.000Z`;
-            const todayEnd = `${today}T23:59:59.999Z`;
 
             // Fetch posts for tag map
             let page = 1, posts = [];
@@ -164,9 +163,9 @@ jobs:
               postTagMap[p.id] = contentTag ? contentTag.name : 'N/A';
             }
 
-            // Fetch members created today
+            // Fetch members created today (só limite inferior — workflow roda à meia-noite)
             const todayMembers = await ghostRequest(
-              `members/?filter=created_at:>='${todayStart}'+created_at:<='${todayEnd}'&fields=id,created_at&limit=200`
+              `members/?filter=created_at:>='${todayStart}'&fields=id,created_at&limit=200`
             );
             console.log(`Membros novos hoje: ${todayMembers.members.length}`);
 
