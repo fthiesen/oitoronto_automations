@@ -104,6 +104,99 @@ jobs:
           main().catch(e => { console.error(e); process.exit(1); });
           SCRIPT
 
+      - name: Fetch current signups-by-tag.json from gh-pages
+        run: |
+          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/signups-by-tag.json" \
+            -o stats-dashboard/public/signups-by-tag.json || echo "[]" > stats-dashboard/public/signups-by-tag.json
+
+      - name: Update signups-by-tag.json with today's new members
+        env:
+          GHOST_URL: https://oitoronto.ghost.io
+          GHOST_ADMIN_API_KEY: ${{ secrets.GHOST_ADMIN_API_KEY }}
+        run: |
+          node - <<'SCRIPT'
+          const { createHmac } = require('crypto');
+          const fs = require('fs');
+
+          const GHOST_URL = process.env.GHOST_URL;
+          const GHOST_ADMIN_API_KEY = process.env.GHOST_ADMIN_API_KEY;
+
+          function generateToken(apiKey) {
+            const [id, secret] = apiKey.split(':');
+            const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT', kid: id })).toString('base64url');
+            const now = Math.floor(Date.now() / 1000);
+            const payload = Buffer.from(JSON.stringify({ iat: now, exp: now + 300, aud: '/admin/' })).toString('base64url');
+            const signature = createHmac('sha256', Buffer.from(secret, 'hex'))
+              .update(`${header}.${payload}`)
+              .digest('base64url');
+            return `${header}.${payload}.${signature}`;
+          }
+
+          async function ghostRequest(endpoint, retries = 3) {
+            const token = generateToken(GHOST_ADMIN_API_KEY);
+            const res = await fetch(`${GHOST_URL}/ghost/api/admin/${endpoint}`, {
+              headers: { Authorization: `Ghost ${token}` }
+            });
+            if (res.status === 429 && retries > 0) {
+              await new Promise(r => setTimeout(r, 1000));
+              return ghostRequest(endpoint, retries - 1);
+            }
+            if (!res.ok) throw new Error(`Ghost API error: ${res.status} on ${endpoint}`);
+            return res.json();
+          }
+
+          async function main() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayStart = `${today}T00:00:00.000Z`;
+            const todayEnd = `${today}T23:59:59.999Z`;
+
+            // Fetch posts for tag map
+            let page = 1, posts = [];
+            while (true) {
+              const data = await ghostRequest(`posts/?filter=status:[published,draft,scheduled]&fields=id&include=tags&limit=100&page=${page}`);
+              posts = posts.concat(data.posts);
+              if (page >= data.meta.pagination.pages) break;
+              page++;
+            }
+            const postTagMap = {};
+            for (const p of posts) {
+              const contentTag = p.tags ? p.tags.find(t => !t.name.startsWith('#')) : null;
+              postTagMap[p.id] = contentTag ? contentTag.name : 'N/A';
+            }
+
+            // Fetch members created today
+            const todayMembers = await ghostRequest(
+              `members/?filter=created_at:>='${todayStart}'+created_at:<='${todayEnd}'&fields=id,created_at&limit=200`
+            );
+            console.log(`Membros novos hoje: ${todayMembers.members.length}`);
+
+            // Fetch attribution for each
+            const tagCounts = {};
+            await Promise.all(todayMembers.members.map(async m => {
+              const single = await ghostRequest(`members/${m.id}/?include=attribution&fields=id,created_at`);
+              const attribution = single.members[0].attribution;
+              let tag = 'N/A';
+              if (attribution && attribution.type === 'post' && postTagMap[attribution.id]) {
+                tag = postTagMap[attribution.id];
+              }
+              tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+            }));
+
+            // Upsert today's entry
+            const dataPath = './stats-dashboard/public/signups-by-tag.json';
+            const existing = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+            const idx = existing.findIndex(d => d.date === today);
+            const entry = { date: today, tags: tagCounts };
+            if (idx === -1) existing.push(entry);
+            else existing[idx] = entry;
+            existing.sort((a, b) => a.date.localeCompare(b.date));
+            fs.writeFileSync(dataPath, JSON.stringify(existing, null, 2));
+            console.log('signups-by-tag.json atualizado.');
+          }
+
+          main().catch(e => { console.error(e); process.exit(1); });
+          SCRIPT
+
       - name: Install dependencies and build
         working-directory: stats-dashboard
         run: |

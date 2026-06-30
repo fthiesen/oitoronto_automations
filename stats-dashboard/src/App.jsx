@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import StatsChart from './StatsChart'
 import ComparisonBlock from './WeekBlock'
+import TagSignups from './TagSignups'
 
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
 
@@ -173,6 +174,8 @@ export default function App() {
 					</span>
 				))}
 			</div>
+
+			<TagSignups />
 		</div>
 	)
 }

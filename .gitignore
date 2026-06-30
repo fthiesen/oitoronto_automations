@@ -1,3 +1,5 @@
 .env
 node_modules/
 stats-dashboard/public/data.json
+stats-dashboard/public/signups-by-tag.json
+signups-by-tag-backfill.json
