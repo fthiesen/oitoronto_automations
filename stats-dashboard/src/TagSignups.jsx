@@ -31,16 +31,20 @@ function monthLabel(ym) {
 
 export default function TagSignups() {
 	const [data, setData] = useState([])
+	const [postsPerTag, setPostsPerTag] = useState({})
 	const [fromMonth, setFromMonth] = useState('')
 	const [toMonth, setToMonth] = useState('')
 	const [error, setError] = useState(null)
 
 	useEffect(() => {
-		fetch('./signups-by-tag.json')
-			.then(r => r.json())
-			.then(d => {
-				setData(d)
-				const months = [...new Set(d.map(e => e.date.substring(0, 7)))].sort()
+		Promise.all([
+			fetch('./signups-by-tag.json').then(r => r.json()),
+			fetch('./posts-per-tag.json').then(r => r.json()),
+		])
+			.then(([signups, posts]) => {
+				setData(signups)
+				setPostsPerTag(posts)
+				const months = [...new Set(signups.map(e => e.date.substring(0, 7)))].sort()
 				setFromMonth(months[0])
 				setToMonth(months[months.length - 1])
 			})
@@ -64,8 +68,20 @@ export default function TagSignups() {
 		})
 	})
 
-	const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1])
-	const total = sorted.reduce((s, [, c]) => s + c, 0)
+	const sorted = Object.entries(totals)
+		.map(([tag, signups]) => {
+			const posts = postsPerTag[tag]
+			const ratio = posts ? signups / posts : null
+			return { tag, signups, posts, ratio }
+		})
+		.sort((a, b) => {
+			if (a.ratio !== null && b.ratio !== null) return b.ratio - a.ratio
+			if (a.ratio !== null) return -1
+			if (b.ratio !== null) return 1
+			return b.signups - a.signups
+		})
+
+	const total = Object.values(totals).reduce((s, c) => s + c, 0)
 
 	const selectStyle = {
 		fontSize: '12px',
@@ -133,7 +149,7 @@ export default function TagSignups() {
 					gap: '8px',
 				}}
 			>
-				{sorted.map(([tag, count]) => (
+				{sorted.map(({ tag, signups, posts, ratio }) => (
 					<div
 						key={tag}
 						style={{
@@ -155,12 +171,28 @@ export default function TagSignups() {
 						>
 							{tag}
 						</p>
-						<p style={{ fontSize: '18px', fontWeight: 600, margin: '0 0 2px' }}>
-							{count.toLocaleString('pt-BR')}
-						</p>
-						<p style={{ fontSize: '11px', margin: 0, opacity: 0.7 }}>
-							{total > 0 ? ((count / total) * 100).toFixed(1) + '%' : '—'}
-						</p>
+						{ratio !== null ? (
+							<>
+								<p style={{ fontSize: '18px', fontWeight: 600, margin: '0 0 2px' }}>
+									{ratio.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+								</p>
+								<p style={{ fontSize: '11px', margin: '0 0 2px', opacity: 0.9 }}>
+									membros por post
+								</p>
+								<p style={{ fontSize: '11px', margin: 0, opacity: 0.6 }}>
+									{signups} cadastros · {posts} posts
+								</p>
+							</>
+						) : (
+							<>
+								<p style={{ fontSize: '18px', fontWeight: 600, margin: '0 0 2px' }}>
+									{signups.toLocaleString('pt-BR')}
+								</p>
+								<p style={{ fontSize: '11px', margin: 0, opacity: 0.7 }}>
+									cadastros
+								</p>
+							</>
+						)}
 					</div>
 				))}
 			</div>

@@ -104,10 +104,12 @@ jobs:
           main().catch(e => { console.error(e); process.exit(1); });
           SCRIPT
 
-      - name: Fetch current signups-by-tag.json from gh-pages
+      - name: Fetch current signups-by-tag.json and posts-per-tag.json from gh-pages
         run: |
           curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/signups-by-tag.json" \
             -o stats-dashboard/public/signups-by-tag.json || echo "[]" > stats-dashboard/public/signups-by-tag.json
+          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/posts-per-tag.json" \
+            -o stats-dashboard/public/posts-per-tag.json || echo "{}" > stats-dashboard/public/posts-per-tag.json
 
       - name: Update signups-by-tag.json with today's new members
         env:
@@ -191,6 +193,15 @@ jobs:
             existing.sort((a, b) => a.date.localeCompare(b.date));
             fs.writeFileSync(dataPath, JSON.stringify(existing, null, 2));
             console.log('signups-by-tag.json atualizado.');
+
+            // Atualiza posts-per-tag.json
+            const counts = {};
+            for (const p of posts) {
+              const tag = p.tags ? p.tags.find(t => !t.name.startsWith('#')) : null;
+              if (tag) counts[tag.name] = (counts[tag.name] || 0) + 1;
+            }
+            fs.writeFileSync('./stats-dashboard/public/posts-per-tag.json', JSON.stringify(counts, null, 2));
+            console.log('posts-per-tag.json atualizado.');
           }
 
           main().catch(e => { console.error(e); process.exit(1); });

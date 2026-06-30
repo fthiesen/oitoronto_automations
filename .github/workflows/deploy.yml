@@ -26,6 +26,8 @@ jobs:
             -o stats-dashboard/public/data.json || echo "[]" > stats-dashboard/public/data.json
           curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/signups-by-tag.json" \
             -o stats-dashboard/public/signups-by-tag.json || echo "[]" > stats-dashboard/public/signups-by-tag.json
+          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/posts-per-tag.json" \
+            -o stats-dashboard/public/posts-per-tag.json || echo "{}" > stats-dashboard/public/posts-per-tag.json
 
       - name: Install dependencies and build
         working-directory: stats-dashboard

@@ -2,4 +2,6 @@
 node_modules/
 stats-dashboard/public/data.json
 stats-dashboard/public/signups-by-tag.json
+stats-dashboard/public/posts-per-tag.json
 signups-by-tag-backfill.json
+posts-per-tag.json
