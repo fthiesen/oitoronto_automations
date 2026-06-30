@@ -3,8 +3,6 @@ name: Deploy Stats Dashboard
 on:
   push:
     branches: [master]
-    paths:
-      - 'stats-dashboard/**'
 
 jobs:
   deploy:
