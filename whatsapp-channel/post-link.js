@@ -28,11 +28,15 @@ function generateJWT(adminApiKey) {
 }
 
 async function fetchNextPost(jwt) {
+  const filters = [
+    "status:published",
+    "tag:-hash-whatsapp-posted",
+    ...(POSTS_SINCE ? [`published_at:>='${POSTS_SINCE}'`] : []),
+  ];
   const url =
     `${GHOST_URL}/ghost/api/admin/posts/` +
     `?limit=1&order=published_at%20asc` +
-    `&filter=status:published%2Btag:-hash-whatsapp-posted` +
-    (POSTS_SINCE ? `%2Bpublished_at:>='${POSTS_SINCE}'` : "") +
+    `&filter=${encodeURIComponent(filters.join("+"))}` +
     `&include=tags`;
   const res = await fetch(url, { headers: { Authorization: `Ghost ${jwt}` } });
   if (!res.ok) throw new Error(`Ghost API retornou ${res.status}: ${await res.text()}`);
