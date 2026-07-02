@@ -1,0 +1,48 @@
+name: Postar link no canal WhatsApp
+
+on:
+  schedule:
+    # Horários em UTC — Toronto é UTC-4 no verão (mar–nov) e UTC-5 no inverno (nov–mar)
+    # Ajuste +1h em novembro quando o horário de verão terminar
+    - cron: "15 11 * * *"   # 7:15am Toronto (verão)
+    - cron: "15 14 * * *"   # 10:15am Toronto
+    - cron: "15 17 * * *"   # 1:15pm Toronto
+    - cron: "15 20 * * *"   # 4:15pm Toronto
+    - cron: "15 23 * * *"   # 7:15pm Toronto
+    - cron: "0 2 * * *"     # 10:00pm Toronto (madrugada UTC)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Postar próximo post do blog
+        env:
+          GHOST_URL: https://oitoronto.ghost.io
+          GHOST_ADMIN_API_KEY: ${{ secrets.GHOST_ADMIN_API_KEY }}
+          WAHA_URL: ${{ secrets.WAHA_URL }}
+          WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
+          WAHA_CHANNEL_ID: ${{ secrets.WAHA_CHANNEL_ID }}
+          WAHA_SESSION: default
+          POST_TEMPLATE: "{url}"
+        working-directory: whatsapp-channel
+        run: node post-link.js
+
+      - name: Salvar posted.json atualizado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add whatsapp-channel/posted.json
+          git diff --cached --quiet || git commit -m "chore: registra post enviado ao canal [skip ci]"
+          git push

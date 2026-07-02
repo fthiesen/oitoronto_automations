@@ -1,0 +1,12 @@
+{
+  "name": "waha-post-link",
+  "version": "1.0.0",
+  "description": "Automação de postagem de links no canal do WhatsApp via WAHA",
+  "main": "post-link.js",
+  "scripts": {
+    "post": "node post-link.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
