@@ -11,6 +11,7 @@ const WAHA_API_KEY = process.env.WAHA_API_KEY;
 const SESSION = process.env.WAHA_SESSION || "default";
 const CHANNEL_ID = process.env.WAHA_CHANNEL_ID;
 const POST_TEMPLATE = process.env.POST_TEMPLATE || "{url}";
+const POSTS_SINCE = process.env.POSTS_SINCE; // ex: "2026-07-02" — ignora posts anteriores a essa data
 
 function generateJWT(adminApiKey) {
   const [id, secret] = adminApiKey.split(":");
@@ -31,6 +32,7 @@ async function fetchNextPost(jwt) {
     `${GHOST_URL}/ghost/api/admin/posts/` +
     `?limit=1&order=published_at%20asc` +
     `&filter=status:published%2Btag:-hash-whatsapp-posted` +
+    (POSTS_SINCE ? `%2Bpublished_at:>='${POSTS_SINCE}'` : "") +
     `&include=tags`;
   const res = await fetch(url, { headers: { Authorization: `Ghost ${jwt}` } });
   if (!res.ok) throw new Error(`Ghost API retornou ${res.status}: ${await res.text()}`);
