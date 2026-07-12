@@ -296,6 +296,11 @@ function buildNewsletterLexical(articles) {
 				styled.html =
 					'<div style="margin-top:0;margin-bottom:1.5em">' + styled.html.trim() + '</div>'
 				children.push(styled)
+				// Divider (card nativo do Ghost) apenas apos banners de imagem,
+				// e apenas se nao for a ultima materia da newsletter
+				if (index < articles.length - 1) {
+					children.push(makeDividerNode())
+				}
 			} else {
 				children.push(article.adCard)
 			}
