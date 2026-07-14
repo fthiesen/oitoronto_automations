@@ -1,0 +1,18 @@
+{
+  "name": "stripe-commissions",
+  "version": "1.0.0",
+  "description": "Partner commission system for OiToronto using Stripe Connect (webhook + control panel + email notifications)",
+  "main": "index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "nodemailer": "^6.9.14",
+    "stripe": "^16.8.0"
+  }
+}
