@@ -1,5 +1,6 @@
 .env
 node_modules/
+.claude/
 stats-dashboard/public/data.json
 stats-dashboard/public/signups-by-tag.json
 stats-dashboard/public/posts-per-tag.json
