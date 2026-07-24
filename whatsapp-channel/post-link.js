@@ -12,6 +12,11 @@ const SESSION = process.env.WAHA_SESSION || "default";
 const CHANNEL_ID = process.env.WAHA_CHANNEL_ID;
 const POSTS_SINCE = process.env.POSTS_SINCE; // ex: "2026-07-02" — ignora posts anteriores a essa data
 const TEST_MODE = process.argv.includes("--test"); // pega o último post e não marca a tag
+// Pré-aquecimento do cache de imagem: envia o preview para este chat antes do
+// canal, para o WhatsApp buscar/cachear a imagem (senão o 1º envio ao canal sai
+// com thumbnail pequeno). Ex: "16478187114@c.us" (conversa consigo mesmo).
+const WARM_CHAT = process.env.WAHA_WARM_CHAT;
+const WARM_DELAY_MS = Number(process.env.WAHA_WARM_DELAY_MS || 20000);
 
 function generateJWT(adminApiKey) {
   const [id, secret] = adminApiKey.split(":");
@@ -59,45 +64,77 @@ function buildCaption(post) {
   return parts.join("\n\n");
 }
 
-// Troca a extensão .webp por .jpg (o Ghost serve o mesmo arquivo em JPEG).
-// URLs que já não são .webp ficam inalteradas.
-function toJpeg(url) {
-  return url.replace(/\.webp(\?.*)?$/i, ".jpg$1");
-}
-
 function buildDescription(post) {
   return post.og_description || post.custom_excerpt || post.excerpt || "";
 }
 
-async function sendToChannel(post) {
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function wahaPost(endpoint, body) {
   const headers = { "Content-Type": "application/json" };
   if (WAHA_API_KEY) headers["X-Api-Key"] = WAHA_API_KEY;
-
-  // Com feature_image: preview de link com imagem JPEG que nós fornecemos.
-  // Sem imagem: fallback para texto simples.
-  const endpoint = post.feature_image ? "send/link-custom-preview" : "sendText";
-  const body = post.feature_image
-    ? {
-        session: SESSION,
-        chatId: CHANNEL_ID,
-        text: post.url,
-        linkPreviewHighQuality: true,
-        preview: {
-          url: post.url,
-          title: post.title,
-          description: buildDescription(post) || post.title,
-          image: { url: toJpeg(post.feature_image) },
-        },
-      }
-    : { session: SESSION, chatId: CHANNEL_ID, text: buildCaption(post) };
-
   const res = await fetch(`${WAHA_URL}/api/${endpoint}`, {
     method: "POST",
     headers,
     body: JSON.stringify(body),
   });
-
   if (!res.ok) throw new Error(`WAHA retornou ${res.status}: ${await res.text()}`);
+  return res.json().catch(() => ({}));
+}
+
+// Preview de link com a feature image do Ghost que nós fornecemos, para um chatId.
+function previewBody(chatId, post) {
+  return {
+    session: SESSION,
+    chatId,
+    text: post.url,
+    linkPreviewHighQuality: true,
+    preview: {
+      url: post.url,
+      title: post.title,
+      description: buildDescription(post) || post.title,
+      image: { url: post.feature_image },
+    },
+  };
+}
+
+async function wahaDelete(chatId, messageId) {
+  const headers = {};
+  if (WAHA_API_KEY) headers["X-Api-Key"] = WAHA_API_KEY;
+  const path =
+    `${SESSION}/chats/${encodeURIComponent(chatId)}` +
+    `/messages/${encodeURIComponent(messageId)}`;
+  const res = await fetch(`${WAHA_URL}/api/${path}`, { method: "DELETE", headers });
+  if (!res.ok) throw new Error(`WAHA delete retornou ${res.status}: ${await res.text()}`);
+}
+
+async function sendToChannel(post) {
+  // Sem imagem: texto simples.
+  if (!post.feature_image) {
+    await wahaPost("sendText", { session: SESSION, chatId: CHANNEL_ID, text: buildCaption(post) });
+    return;
+  }
+
+  // Pré-aquece o cache: manda o preview para WARM_CHAT e espera, para o WhatsApp
+  // cachear a imagem antes do envio ao canal (senão o 1º envio sai pequeno).
+  let warmMsgId;
+  if (WARM_CHAT) {
+    const warm = await wahaPost("send/link-custom-preview", previewBody(WARM_CHAT, post));
+    warmMsgId = warm && warm.id;
+    await sleep(WARM_DELAY_MS);
+  }
+
+  await wahaPost("send/link-custom-preview", previewBody(CHANNEL_ID, post));
+
+  // Canal já recebeu (imagem cacheada) — apaga o aquecimento pra não lotar o chat.
+  // Falha aqui não é crítica: a postagem no canal já foi feita.
+  if (WARM_CHAT && warmMsgId) {
+    try {
+      await wahaDelete(WARM_CHAT, warmMsgId);
+    } catch (e) {
+      console.error("Aviso: não consegui apagar a mensagem de aquecimento:", e.message);
+    }
+  }
 }
 
 async function markAsPosted(jwt, post) {
@@ -137,7 +174,11 @@ async function main() {
   await markAsPosted(jwt, post);
 }
 
-main().catch((err) => {
-  console.error(err.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err.message);
+    process.exit(1);
+  });
+}
+
+module.exports = { generateJWT, sendToChannel, previewBody, wahaPost };
