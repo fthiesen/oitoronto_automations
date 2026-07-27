@@ -14,7 +14,8 @@ const POSTS_SINCE = process.env.POSTS_SINCE; // ex: "2026-07-02" — ignora post
 const TEST_MODE = process.argv.includes("--test"); // pega o último post e não marca a tag
 // Pré-aquecimento do cache de imagem: envia o preview para este chat antes do
 // canal, para o WhatsApp buscar/cachear a imagem (senão o 1º envio ao canal sai
-// com thumbnail pequeno). Ex: "16478187114@c.us" (conversa consigo mesmo).
+// com thumbnail pequeno). DEVE ser um chat DESCARTÁVEL (ex: um grupo só do bot,
+// "...@g.us") — o chat é LIMPO após cada post, então não use conversas reais.
 const WARM_CHAT = process.env.WAHA_WARM_CHAT;
 const WARM_DELAY_MS = Number(process.env.WAHA_WARM_DELAY_MS || 20000);
 
@@ -98,6 +99,8 @@ function previewBody(chatId, post) {
   };
 }
 
+// Apaga uma mensagem (revoke). No GOWS é o único método disponível (clear-chat
+// não é implementado). Deixa um tombstone, mas no grupo descartável isso é ok.
 async function wahaDelete(chatId, messageId) {
   const headers = {};
   if (WAHA_API_KEY) headers["X-Api-Key"] = WAHA_API_KEY;
@@ -126,7 +129,7 @@ async function sendToChannel(post) {
 
   await wahaPost("send/link-custom-preview", previewBody(CHANNEL_ID, post));
 
-  // Canal já recebeu (imagem cacheada) — apaga o aquecimento pra não lotar o chat.
+  // Canal já recebeu (imagem cacheada) — apaga a mensagem de aquecimento.
   // Falha aqui não é crítica: a postagem no canal já foi feita.
   if (WARM_CHAT && warmMsgId) {
     try {
