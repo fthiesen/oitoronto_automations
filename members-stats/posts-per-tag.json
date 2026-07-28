@@ -1,5 +1,6 @@
 {
-  "Saúde": 18,
+  "Saúde": 19,
+  "Paladar": 47,
   "Trabalho": 50,
   "Notícia": 46,
   "Transporte": 46,
@@ -10,7 +11,6 @@
   "Dinheiro": 40,
   "Imigração": 42,
   "Educação": 22,
-  "Paladar": 46,
   "Natureza": 3,
   "Cinema": 8,
   "Papelada": 6,
