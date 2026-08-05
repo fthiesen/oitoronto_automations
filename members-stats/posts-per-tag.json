@@ -1,7 +1,8 @@
 {
-  "Paladar": 48,
-  "Lazer": 173,
+  "Paladar": 49,
+  "Moradia": 35,
   "Saúde": 19,
+  "Lazer": 173,
   "Papelada": 8,
   "Transporte": 47,
   "Dinheiro": 41,
@@ -9,7 +10,6 @@
   "Música": 56,
   "Trabalho": 52,
   "Esporte": 5,
-  "Moradia": 34,
   "Imigração": 42,
   "Educação": 22,
   "Natureza": 3,
