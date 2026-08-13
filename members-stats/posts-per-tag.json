@@ -1,6 +1,8 @@
 {
+  "Transporte": 49,
+  "Moradia": 39,
   "Trabalho": 54,
-  "Moradia": 38,
+  "Papelada": 9,
   "Saúde": 21,
   "Lazer": 175,
   "Educação": 23,
@@ -9,8 +11,6 @@
   "Natureza": 4,
   "Dinheiro": 42,
   "Paladar": 49,
-  "Papelada": 8,
-  "Transporte": 47,
   "Esporte": 5,
   "Imigração": 42,
   "Cinema": 8,
