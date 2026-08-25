@@ -25,7 +25,9 @@ function label(str) {
 function buildGrid(year, month) {
 	const first = new Date(year, month, 1)
 	const start = new Date(year, month, 1 - first.getDay())
-	return Array.from({ length: 42 }, (_, i) => new Date(year, month, start.getDate() + i))
+	// A partir de `start` (que costuma cair no mes anterior), nao de `month`:
+	// usar `month` aqui desloca a grade inteira em um mes.
+	return Array.from({ length: 42 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i))
 }
 
 export default function DateRangePicker({ dates, from, to, onChange }) {
