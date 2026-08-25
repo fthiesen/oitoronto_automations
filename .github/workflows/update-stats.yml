@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # historico completo: o step de backup faz rebase antes do push
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -22,9 +24,11 @@ jobs:
 
       - name: Fetch current data.json from gh-pages
         run: |
+          # Sem fallback: se o curl falhar, o step aborta (bash -e).
+          # Publicar um JSON vazio sobrescreveria o histórico na gh-pages, que é a única cópia.
           mkdir -p stats-dashboard/public
-          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/data.json" \
-            -o stats-dashboard/public/data.json || echo "[]" > stats-dashboard/public/data.json
+          curl -fsS --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/data.json" \
+            -o stats-dashboard/public/data.json
 
       - name: Fetch Ghost data and update data.json
         env:
@@ -106,10 +110,12 @@ jobs:
 
       - name: Fetch current signups-by-tag.json and posts-per-tag.json from gh-pages
         run: |
-          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/signups-by-tag.json" \
-            -o stats-dashboard/public/signups-by-tag.json || echo "[]" > stats-dashboard/public/signups-by-tag.json
-          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/posts-per-tag.json" \
-            -o stats-dashboard/public/posts-per-tag.json || echo "{}" > stats-dashboard/public/posts-per-tag.json
+          # Sem fallback: se o curl falhar, o step aborta (bash -e).
+          # Publicar um JSON vazio sobrescreveria o histórico na gh-pages, que é a única cópia.
+          curl -fsS --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/signups-by-tag.json" \
+            -o stats-dashboard/public/signups-by-tag.json
+          curl -fsS --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/posts-per-tag.json" \
+            -o stats-dashboard/public/posts-per-tag.json
 
       - name: Update signups-by-tag.json with today's new members
         env:
@@ -206,6 +212,26 @@ jobs:
 
           main().catch(e => { console.error(e); process.exit(1); });
           SCRIPT
+
+      # Backup versionado: a gh-pages guarda so a versao mais recente (e sobrescrita todo dia).
+      # Commitando na master, cada dia vira um commit e da pra recuperar qualquer data com:
+      #   git show <sha>:data/data.json > stats-dashboard/public/data.json
+      - name: Backup dos dados na master
+        run: |
+          mkdir -p data
+          cp stats-dashboard/public/data.json data/
+          cp stats-dashboard/public/signups-by-tag.json data/
+          cp stats-dashboard/public/posts-per-tag.json data/
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --staged --quiet; then
+            echo "Sem mudancas nos dados, nada a commitar."
+          else
+            git commit -m "chore: backup diario dos dados de stats"
+            git pull --rebase origin master
+            git push origin HEAD:master
+          fi
 
       - name: Install dependencies and build
         working-directory: stats-dashboard

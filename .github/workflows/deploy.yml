@@ -21,13 +21,15 @@ jobs:
 
       - name: Fetch current data files from gh-pages
         run: |
+          # Sem fallback: se o curl falhar, o step aborta (bash -e).
+          # Publicar um JSON vazio sobrescreveria o histórico na gh-pages, que é a única cópia.
           mkdir -p stats-dashboard/public
-          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/data.json" \
-            -o stats-dashboard/public/data.json || echo "[]" > stats-dashboard/public/data.json
-          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/signups-by-tag.json" \
-            -o stats-dashboard/public/signups-by-tag.json || echo "[]" > stats-dashboard/public/signups-by-tag.json
-          curl -f "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/posts-per-tag.json" \
-            -o stats-dashboard/public/posts-per-tag.json || echo "{}" > stats-dashboard/public/posts-per-tag.json
+          curl -fsS --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/data.json" \
+            -o stats-dashboard/public/data.json
+          curl -fsS --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/signups-by-tag.json" \
+            -o stats-dashboard/public/signups-by-tag.json
+          curl -fsS --retry 3 --retry-delay 2 "https://raw.githubusercontent.com/fthiesen/oitoronto_automations/gh-pages/members-stats/posts-per-tag.json" \
+            -o stats-dashboard/public/posts-per-tag.json
 
       - name: Install dependencies and build
         working-directory: stats-dashboard
