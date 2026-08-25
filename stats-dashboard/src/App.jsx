@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import StatsChart from './StatsChart'
 import ComparisonBlock from './WeekBlock'
 import TagSignups from './TagSignups'
+import DateRangePicker from './DateRangePicker'
 
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
 
@@ -75,51 +76,15 @@ export default function App() {
 						OiToronto Stats
 					</h1>
 					<p style={{ fontSize: '12px', color: '#888', marginBottom: '0.75rem' }}>Atualizado diariamente à meia-noite</p>
-					<div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-						<select
-							value={from}
-							onChange={e => {
-								const val = parseInt(e.target.value)
-								setFrom(val)
-								if (val > to) setTo(val)
-							}}
-							style={{
-								fontSize: '12px',
-								padding: '4px 8px',
-								borderRadius: '6px',
-								border: '0.5px solid #ccc',
-								background: '#fff',
-							}}
-						>
-							{data.map((d, i) => (
-								<option key={i} value={i}>
-									{shortLabel(d.date)}
-								</option>
-							))}
-						</select>
-						<span style={{ fontSize: '12px', color: '#888' }}>até</span>
-						<select
-							value={to}
-							onChange={e => {
-								const val = parseInt(e.target.value)
-								setTo(val)
-								if (val < from) setFrom(val)
-							}}
-							style={{
-								fontSize: '12px',
-								padding: '4px 8px',
-								borderRadius: '6px',
-								border: '0.5px solid #ccc',
-								background: '#fff',
-							}}
-						>
-							{data.map((d, i) => (
-								<option key={i} value={i} disabled={i < from}>
-									{shortLabel(d.date)}
-								</option>
-							))}
-						</select>
-					</div>
+					<DateRangePicker
+						dates={data.map(d => d.date)}
+						from={from}
+						to={to}
+						onChange={(f, t) => {
+							setFrom(f)
+							setTo(t)
+						}}
+					/>
 				</div>
 				{totalPosts != null && (
 					<div
