@@ -1,5 +1,6 @@
 // post-link.js
-// Busca o post mais antigo sem a tag #whatsapp-posted e envia ao canal do WhatsApp.
+// Busca o post mais antigo sem a tag #whatsapp-posted e envia ao canal do WhatsApp
+// como preview de link (imagem + título + descrição, tudo do Ghost).
 // Depois de enviar, adiciona a tag ao post no Ghost para não repostar.
 
 const crypto = require("crypto");
@@ -12,16 +13,6 @@ const SESSION = process.env.WAHA_SESSION || "default";
 const CHANNEL_ID = process.env.WAHA_CHANNEL_ID;
 const POSTS_SINCE = process.env.POSTS_SINCE; // ex: "2026-07-02" — ignora posts anteriores a essa data
 const TEST_MODE = process.argv.includes("--test"); // pega o último post e não marca a tag
-// Pré-aquecimento do cache de imagem: envia o preview para este chat antes do
-// canal, para o WhatsApp buscar/cachear a imagem (senão o 1º envio ao canal sai
-// com thumbnail pequeno). Use um chat DESCARTÁVEL (ex: um grupo só do bot,
-// "...@g.us") — não uma conversa real.
-const WARM_CHAT = process.env.WAHA_WARM_CHAT;
-const WARM_DELAY_MS = Number(process.env.WAHA_WARM_DELAY_MS || 20000);
-// Apagar a mensagem de aquecimento (revoke) pode remover a mídia em cache e
-// quebrar o preview do canal de forma aleatória. Por isso NÃO apagamos por padrão;
-// o grupo descartável fica arquivado. Defina WAHA_WARM_DELETE=true para reativar.
-const WARM_DELETE = process.env.WAHA_WARM_DELETE === "true";
 
 function generateJWT(adminApiKey) {
   const [id, secret] = adminApiKey.split(":");
@@ -59,8 +50,11 @@ async function fetchNextPost(jwt) {
   return posts[0] || null;
 }
 
-// Monta a legenda da mensagem: título em negrito + descrição + link.
-// Puxa tudo do Ghost — não depende do preview automático do WhatsApp.
+function buildDescription(post) {
+  return post.og_description || post.custom_excerpt || post.excerpt || "";
+}
+
+// Fallback (post sem imagem): título em negrito + descrição + link no texto.
 function buildCaption(post) {
   const description = buildDescription(post);
   const parts = [`*${post.title}*`];
@@ -69,21 +63,15 @@ function buildCaption(post) {
   return parts.join("\n\n");
 }
 
-function buildDescription(post) {
-  return post.og_description || post.custom_excerpt || post.excerpt || "";
-}
-
-// Reduz a imagem do Ghost para JPEG ~1200px. Imagens pesadas (PNG grande, >600KB)
-// falham no upload da miniatura para o CDN do WhatsApp e a imagem some no canal;
-// o transform do Ghost resolve na origem. URLs que não são do Ghost ficam iguais.
+// Reduz a imagem do Ghost para JPEG ~1200px. O WhatsApp só renderiza JPEG de forma
+// confiável no preview do canal — imagens webp ou PNG falham (imagem some). O
+// transform do Ghost converte na origem. URLs que não são do Ghost ficam iguais.
 function toWhatsAppImage(url) {
   if (url && url.includes("/content/images/") && !url.includes("/content/images/size/")) {
     return url.replace("/content/images/", "/content/images/size/w1200/format/jpeg/");
   }
   return url;
 }
-
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function wahaPost(endpoint, body) {
   const headers = { "Content-Type": "application/json" };
@@ -97,11 +85,16 @@ async function wahaPost(endpoint, body) {
   return res.json().catch(() => ({}));
 }
 
-// Preview de link com a feature image do Ghost que nós fornecemos, para um chatId.
-function previewBody(chatId, post) {
-  return {
+async function sendToChannel(post) {
+  // Sem imagem: texto simples.
+  if (!post.feature_image) {
+    await wahaPost("sendText", { session: SESSION, chatId: CHANNEL_ID, text: buildCaption(post) });
+    return;
+  }
+  // Com imagem: preview de link, com a imagem convertida para JPEG.
+  await wahaPost("send/link-custom-preview", {
     session: SESSION,
-    chatId,
+    chatId: CHANNEL_ID,
     text: post.url,
     linkPreviewHighQuality: true,
     preview: {
@@ -110,49 +103,7 @@ function previewBody(chatId, post) {
       description: buildDescription(post) || post.title,
       image: { url: toWhatsAppImage(post.feature_image) },
     },
-  };
-}
-
-// Apaga uma mensagem (revoke). No GOWS é o único método disponível (clear-chat
-// não é implementado). Deixa um tombstone, mas no grupo descartável isso é ok.
-async function wahaDelete(chatId, messageId) {
-  const headers = {};
-  if (WAHA_API_KEY) headers["X-Api-Key"] = WAHA_API_KEY;
-  const path =
-    `${SESSION}/chats/${encodeURIComponent(chatId)}` +
-    `/messages/${encodeURIComponent(messageId)}`;
-  const res = await fetch(`${WAHA_URL}/api/${path}`, { method: "DELETE", headers });
-  if (!res.ok) throw new Error(`WAHA delete retornou ${res.status}: ${await res.text()}`);
-}
-
-async function sendToChannel(post) {
-  // Sem imagem: texto simples.
-  if (!post.feature_image) {
-    await wahaPost("sendText", { session: SESSION, chatId: CHANNEL_ID, text: buildCaption(post) });
-    return;
-  }
-
-  // Pré-aquece o cache: manda o preview para WARM_CHAT e espera, para o WhatsApp
-  // cachear a imagem antes do envio ao canal (senão o 1º envio sai pequeno).
-  let warmMsgId;
-  if (WARM_CHAT) {
-    const warm = await wahaPost("send/link-custom-preview", previewBody(WARM_CHAT, post));
-    warmMsgId = warm && warm.id;
-    await sleep(WARM_DELAY_MS);
-  }
-
-  await wahaPost("send/link-custom-preview", previewBody(CHANNEL_ID, post));
-
-  // Canal já recebeu — só apaga o aquecimento se explicitamente habilitado
-  // (revoke pode remover a mídia em cache e quebrar o preview do canal).
-  // Falha aqui não é crítica: a postagem no canal já foi feita.
-  if (WARM_DELETE && WARM_CHAT && warmMsgId) {
-    try {
-      await wahaDelete(WARM_CHAT, warmMsgId);
-    } catch (e) {
-      console.error("Aviso: não consegui apagar a mensagem de aquecimento:", e.message);
-    }
-  }
+  });
 }
 
 async function markAsPosted(jwt, post) {
@@ -199,4 +150,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { generateJWT, sendToChannel, previewBody, wahaPost };
+module.exports = { generateJWT, sendToChannel, wahaPost, toWhatsAppImage };
