@@ -73,6 +73,16 @@ function buildDescription(post) {
   return post.og_description || post.custom_excerpt || post.excerpt || "";
 }
 
+// Reduz a imagem do Ghost para JPEG ~1200px. Imagens pesadas (PNG grande, >600KB)
+// falham no upload da miniatura para o CDN do WhatsApp e a imagem some no canal;
+// o transform do Ghost resolve na origem. URLs que não são do Ghost ficam iguais.
+function toWhatsAppImage(url) {
+  if (url && url.includes("/content/images/") && !url.includes("/content/images/size/")) {
+    return url.replace("/content/images/", "/content/images/size/w1200/format/jpeg/");
+  }
+  return url;
+}
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function wahaPost(endpoint, body) {
@@ -98,7 +108,7 @@ function previewBody(chatId, post) {
       url: post.url,
       title: post.title,
       description: buildDescription(post) || post.title,
-      image: { url: post.feature_image },
+      image: { url: toWhatsAppImage(post.feature_image) },
     },
   };
 }
