@@ -1,0 +1,628 @@
+[
+  {
+    "date": "2026-06-16",
+    "ativos": 1498,
+    "total": 2270,
+    "newsletters": 1764,
+    "integra": 1614,
+    "novidades": 150
+  },
+  {
+    "date": "2026-06-17",
+    "ativos": 1518,
+    "total": 2303,
+    "newsletters": 1794,
+    "integra": 1612,
+    "novidades": 182
+  },
+  {
+    "date": "2026-06-18",
+    "ativos": 1520,
+    "total": 2307,
+    "newsletters": 1796,
+    "integra": 1608,
+    "novidades": 188
+  },
+  {
+    "date": "2026-06-19",
+    "ativos": 1525,
+    "total": 2311,
+    "newsletters": 1797,
+    "integra": 1607,
+    "novidades": 190
+  },
+  {
+    "date": "2026-06-20",
+    "ativos": 1525,
+    "total": 2311,
+    "newsletters": 1797,
+    "integra": 1607,
+    "novidades": 190
+  },
+  {
+    "date": "2026-06-21",
+    "ativos": 1524,
+    "total": 2311,
+    "newsletters": 1797,
+    "integra": 1607,
+    "novidades": 190
+  },
+  {
+    "date": "2026-06-22",
+    "ativos": 1520,
+    "total": 2311,
+    "newsletters": 1796,
+    "integra": 1606,
+    "novidades": 190
+  },
+  {
+    "date": "2026-06-23",
+    "ativos": 1519,
+    "total": 2311,
+    "newsletters": 1795,
+    "integra": 1605,
+    "novidades": 190
+  },
+  {
+    "date": "2026-06-24",
+    "ativos": 1522,
+    "total": 2311,
+    "newsletters": 1792,
+    "integra": 1604,
+    "novidades": 188
+  },
+  {
+    "date": "2026-06-25",
+    "ativos": 1521,
+    "total": 2311,
+    "newsletters": 1789,
+    "integra": 1602,
+    "novidades": 187
+  },
+  {
+    "date": "2026-06-26",
+    "ativos": 1521,
+    "total": 2313,
+    "newsletters": 1792,
+    "integra": 1604,
+    "novidades": 188
+  },
+  {
+    "date": "2026-06-27",
+    "ativos": 1526,
+    "total": 2316,
+    "newsletters": 1796,
+    "integra": 1605,
+    "novidades": 191
+  },
+  {
+    "date": "2026-06-28",
+    "ativos": 1528,
+    "total": 2316,
+    "newsletters": 1796,
+    "integra": 1605,
+    "novidades": 191
+  },
+  {
+    "date": "2026-06-29",
+    "ativos": 1527,
+    "total": 2317,
+    "newsletters": 1796,
+    "integra": 1605,
+    "novidades": 191,
+    "posts": 579
+  },
+  {
+    "date": "2026-06-30",
+    "ativos": 1522,
+    "total": 2317,
+    "newsletters": 1796,
+    "integra": 1605,
+    "novidades": 191,
+    "posts": 580
+  },
+  {
+    "date": "2026-07-01",
+    "ativos": 1522,
+    "total": 2318,
+    "newsletters": 1796,
+    "integra": 1605,
+    "novidades": 191,
+    "posts": 581
+  },
+  {
+    "date": "2026-07-02",
+    "ativos": 1525,
+    "total": 2320,
+    "newsletters": 1796,
+    "integra": 1604,
+    "novidades": 192,
+    "posts": 583
+  },
+  {
+    "date": "2026-07-03",
+    "ativos": 1527,
+    "total": 2321,
+    "newsletters": 1797,
+    "integra": 1604,
+    "novidades": 193,
+    "posts": 584
+  },
+  {
+    "date": "2026-07-04",
+    "ativos": 1523,
+    "total": 2321,
+    "newsletters": 1796,
+    "integra": 1603,
+    "novidades": 193,
+    "posts": 586
+  },
+  {
+    "date": "2026-07-05",
+    "ativos": 1522,
+    "total": 2323,
+    "newsletters": 1797,
+    "integra": 1602,
+    "novidades": 195,
+    "posts": 586
+  },
+  {
+    "date": "2026-07-06",
+    "ativos": 1517,
+    "total": 2323,
+    "newsletters": 1797,
+    "integra": 1602,
+    "novidades": 195,
+    "posts": 586
+  },
+  {
+    "date": "2026-07-07",
+    "ativos": 1527,
+    "total": 2330,
+    "newsletters": 1803,
+    "integra": 1603,
+    "novidades": 200,
+    "posts": 588
+  },
+  {
+    "date": "2026-07-08",
+    "ativos": 1528,
+    "total": 2332,
+    "newsletters": 1802,
+    "integra": 1602,
+    "novidades": 200,
+    "posts": 590
+  },
+  {
+    "date": "2026-07-09",
+    "ativos": 1525,
+    "total": 2332,
+    "newsletters": 1800,
+    "integra": 1600,
+    "novidades": 200,
+    "posts": 592
+  },
+  {
+    "date": "2026-07-10",
+    "ativos": 1525,
+    "total": 2334,
+    "newsletters": 1800,
+    "integra": 1598,
+    "novidades": 202,
+    "posts": 594
+  },
+  {
+    "date": "2026-07-11",
+    "ativos": 1528,
+    "total": 2335,
+    "newsletters": 1801,
+    "integra": 1598,
+    "novidades": 203,
+    "posts": 596
+  },
+  {
+    "date": "2026-07-12",
+    "ativos": 1527,
+    "total": 2335,
+    "newsletters": 1801,
+    "integra": 1598,
+    "novidades": 203,
+    "posts": 596
+  },
+  {
+    "date": "2026-07-13",
+    "ativos": 1524,
+    "total": 2335,
+    "newsletters": 1801,
+    "integra": 1598,
+    "novidades": 203,
+    "posts": 596
+  },
+  {
+    "date": "2026-07-14",
+    "ativos": 1523,
+    "total": 2337,
+    "newsletters": 1801,
+    "integra": 1596,
+    "novidades": 205,
+    "posts": 598
+  },
+  {
+    "date": "2026-07-15",
+    "ativos": 1520,
+    "total": 2337,
+    "newsletters": 1799,
+    "integra": 1594,
+    "novidades": 205,
+    "posts": 600
+  },
+  {
+    "date": "2026-07-16",
+    "ativos": 1517,
+    "total": 2338,
+    "newsletters": 1797,
+    "integra": 1592,
+    "novidades": 205,
+    "posts": 602
+  },
+  {
+    "date": "2026-07-17",
+    "ativos": 1517,
+    "total": 2340,
+    "newsletters": 1799,
+    "integra": 1592,
+    "novidades": 207,
+    "posts": 604
+  },
+  {
+    "date": "2026-07-18",
+    "ativos": 1517,
+    "total": 2340,
+    "newsletters": 1799,
+    "integra": 1592,
+    "novidades": 207,
+    "posts": 606
+  },
+  {
+    "date": "2026-07-19",
+    "ativos": 1517,
+    "total": 2340,
+    "newsletters": 1799,
+    "integra": 1592,
+    "novidades": 207,
+    "posts": 606
+  },
+  {
+    "date": "2026-07-20",
+    "ativos": 1517,
+    "total": 2340,
+    "newsletters": 1799,
+    "integra": 1592,
+    "novidades": 207,
+    "posts": 606
+  },
+  {
+    "date": "2026-07-21",
+    "ativos": 1515,
+    "total": 2340,
+    "newsletters": 1799,
+    "integra": 1592,
+    "novidades": 207,
+    "posts": 606
+  },
+  {
+    "date": "2026-07-22",
+    "ativos": 1515,
+    "total": 2341,
+    "newsletters": 1796,
+    "integra": 1589,
+    "novidades": 207,
+    "posts": 608
+  },
+  {
+    "date": "2026-07-23",
+    "ativos": 1514,
+    "total": 2343,
+    "newsletters": 1798,
+    "integra": 1589,
+    "novidades": 209,
+    "posts": 610
+  },
+  {
+    "date": "2026-07-24",
+    "ativos": 1514,
+    "total": 2343,
+    "newsletters": 1797,
+    "integra": 1588,
+    "novidades": 209,
+    "posts": 612
+  },
+  {
+    "date": "2026-07-25",
+    "ativos": 1512,
+    "total": 2343,
+    "newsletters": 1796,
+    "integra": 1587,
+    "novidades": 209,
+    "posts": 614
+  },
+  {
+    "date": "2026-07-26",
+    "ativos": 1510,
+    "total": 2343,
+    "newsletters": 1794,
+    "integra": 1586,
+    "novidades": 208,
+    "posts": 616
+  },
+  {
+    "date": "2026-07-27",
+    "ativos": 1503,
+    "total": 2343,
+    "newsletters": 1793,
+    "integra": 1586,
+    "novidades": 207,
+    "posts": 616
+  },
+  {
+    "date": "2026-07-28",
+    "ativos": 1508,
+    "total": 2346,
+    "newsletters": 1796,
+    "integra": 1586,
+    "novidades": 210,
+    "posts": 618
+  },
+  {
+    "date": "2026-07-29",
+    "ativos": 1508,
+    "total": 2348,
+    "newsletters": 1797,
+    "integra": 1585,
+    "novidades": 212,
+    "posts": 621
+  },
+  {
+    "date": "2026-07-30",
+    "ativos": 1511,
+    "total": 2350,
+    "newsletters": 1798,
+    "integra": 1584,
+    "novidades": 214,
+    "posts": 622
+  },
+  {
+    "date": "2026-07-31",
+    "ativos": 1511,
+    "total": 2350,
+    "newsletters": 1796,
+    "integra": 1582,
+    "novidades": 214,
+    "posts": 624
+  },
+  {
+    "date": "2026-08-01",
+    "ativos": 1525,
+    "total": 2362,
+    "newsletters": 1810,
+    "integra": 1584,
+    "novidades": 226,
+    "posts": 626
+  },
+  {
+    "date": "2026-08-02",
+    "ativos": 1535,
+    "total": 2371,
+    "newsletters": 1820,
+    "integra": 1585,
+    "novidades": 235,
+    "posts": 626
+  },
+  {
+    "date": "2026-08-03",
+    "ativos": 1539,
+    "total": 2378,
+    "newsletters": 1827,
+    "integra": 1585,
+    "novidades": 242,
+    "posts": 626
+  },
+  {
+    "date": "2026-08-04",
+    "ativos": 1543,
+    "total": 2386,
+    "newsletters": 1834,
+    "integra": 1585,
+    "novidades": 249,
+    "posts": 628
+  },
+  {
+    "date": "2026-08-05",
+    "ativos": 1545,
+    "total": 2386,
+    "newsletters": 1830,
+    "integra": 1582,
+    "novidades": 248,
+    "posts": 630
+  },
+  {
+    "date": "2026-08-06",
+    "ativos": 1543,
+    "total": 2388,
+    "newsletters": 1832,
+    "integra": 1583,
+    "novidades": 249,
+    "posts": 632
+  },
+  {
+    "date": "2026-08-07",
+    "ativos": 1542,
+    "total": 2389,
+    "newsletters": 1833,
+    "integra": 1583,
+    "novidades": 250,
+    "posts": 633
+  },
+  {
+    "date": "2026-08-08",
+    "ativos": 1543,
+    "total": 2389,
+    "newsletters": 1831,
+    "integra": 1582,
+    "novidades": 249,
+    "posts": 633
+  },
+  {
+    "date": "2026-08-09",
+    "ativos": 1541,
+    "total": 2389,
+    "newsletters": 1831,
+    "integra": 1582,
+    "novidades": 249,
+    "posts": 633
+  },
+  {
+    "date": "2026-08-10",
+    "ativos": 1544,
+    "total": 2391,
+    "newsletters": 1832,
+    "integra": 1582,
+    "novidades": 250,
+    "posts": 635
+  },
+  {
+    "date": "2026-08-11",
+    "ativos": 1544,
+    "total": 2392,
+    "newsletters": 1831,
+    "integra": 1581,
+    "novidades": 250,
+    "posts": 638
+  },
+  {
+    "date": "2026-08-12",
+    "ativos": 1549,
+    "total": 2394,
+    "newsletters": 1830,
+    "integra": 1578,
+    "novidades": 252,
+    "posts": 641
+  },
+  {
+    "date": "2026-08-13",
+    "ativos": 1549,
+    "total": 2396,
+    "newsletters": 1829,
+    "integra": 1576,
+    "novidades": 253,
+    "posts": 642
+  },
+  {
+    "date": "2026-08-14",
+    "ativos": 1549,
+    "total": 2400,
+    "newsletters": 1831,
+    "integra": 1576,
+    "novidades": 255,
+    "posts": 644
+  },
+  {
+    "date": "2026-08-15",
+    "ativos": 1550,
+    "total": 2400,
+    "newsletters": 1829,
+    "integra": 1575,
+    "novidades": 254,
+    "posts": 646
+  },
+  {
+    "date": "2026-08-16",
+    "ativos": 1551,
+    "total": 2401,
+    "newsletters": 1831,
+    "integra": 1576,
+    "novidades": 255,
+    "posts": 646
+  },
+  {
+    "date": "2026-08-17",
+    "ativos": 1552,
+    "total": 2402,
+    "newsletters": 1831,
+    "integra": 1576,
+    "novidades": 255,
+    "posts": 646
+  },
+  {
+    "date": "2026-08-18",
+    "ativos": 1548,
+    "total": 2403,
+    "newsletters": 1832,
+    "integra": 1576,
+    "novidades": 256,
+    "posts": 648
+  },
+  {
+    "date": "2026-08-19",
+    "ativos": 1546,
+    "total": 2408,
+    "newsletters": 1837,
+    "integra": 1576,
+    "novidades": 261,
+    "posts": 650
+  },
+  {
+    "date": "2026-08-20",
+    "ativos": 1552,
+    "total": 2410,
+    "newsletters": 1835,
+    "integra": 1575,
+    "novidades": 260,
+    "posts": 652
+  },
+  {
+    "date": "2026-08-21",
+    "ativos": 1551,
+    "total": 2412,
+    "newsletters": 1836,
+    "integra": 1575,
+    "novidades": 261,
+    "posts": 654
+  },
+  {
+    "date": "2026-08-22",
+    "ativos": 1553,
+    "total": 2413,
+    "newsletters": 1836,
+    "integra": 1574,
+    "novidades": 262,
+    "posts": 656
+  },
+  {
+    "date": "2026-08-24",
+    "ativos": 1552,
+    "total": 2414,
+    "newsletters": 1836,
+    "integra": 1573,
+    "novidades": 263,
+    "posts": 656
+  },
+  {
+    "date": "2026-08-25",
+    "ativos": 1563,
+    "total": 2428,
+    "newsletters": 1855,
+    "integra": 1578,
+    "novidades": 277,
+    "posts": 658
+  },
+  {
+    "date": "2026-08-26",
+    "ativos": 1570,
+    "total": 2435,
+    "newsletters": 1864,
+    "integra": 1580,
+    "novidades": 284,
+    "posts": 660
+  }
+]
