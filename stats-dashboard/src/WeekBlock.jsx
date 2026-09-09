@@ -1,4 +1,5 @@
 import { shortLabel } from './App'
+import { num } from './i18n'
 
 export default function ComparisonBlock({ firstDay, lastDay, metrics }) {
 	const sameDay = firstDay.date === lastDay.date
@@ -36,7 +37,7 @@ export default function ComparisonBlock({ firstDay, lastDay, metrics }) {
 								{m.label}
 							</p>
 							<p style={{ fontSize: '18px', fontWeight: 600, margin: 0 }}>
-								{firstDay[m.key].toLocaleString('pt-BR')}
+								{num(firstDay[m.key])}
 							</p>
 						</div>
 					))}
@@ -127,7 +128,7 @@ export default function ComparisonBlock({ firstDay, lastDay, metrics }) {
 										{m.label}
 									</p>
 									<p style={{ fontSize: '18px', fontWeight: 600, margin: 0 }}>
-										{lastDay[m.key].toLocaleString('pt-BR')}
+										{num(lastDay[m.key])}
 									</p>
 								</div>
 							))}
@@ -203,13 +204,13 @@ export default function ComparisonBlock({ firstDay, lastDay, metrics }) {
 								</span>
 								<div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
 									<span style={{ fontSize: '13px', fontWeight: 600 }}>
-										{startVal.toLocaleString('pt-BR')}
+										{num(startVal)}
 									</span>
 									{!sameDay && (
 										<>
 											<span style={{ fontSize: '12px', opacity: 0.7 }}>→</span>
 											<span style={{ fontSize: '13px', fontWeight: 600 }}>
-												{endVal.toLocaleString('pt-BR')}
+												{num(endVal)}
 											</span>
 											<span
 												style={{

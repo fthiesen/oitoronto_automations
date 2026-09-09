@@ -1,8 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-
-const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
-const MONTHS_SHORT = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
-const WEEKDAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
+import { t, dayLabel } from './i18n'
 
 // 'YYYY-MM-DD' -> Date local (evita o deslocamento de fuso do Date.parse)
 function parseDate(str) {
@@ -14,11 +11,6 @@ function toKey(date) {
 	const m = String(date.getMonth() + 1).padStart(2, '0')
 	const d = String(date.getDate()).padStart(2, '0')
 	return date.getFullYear() + '-' + m + '-' + d
-}
-
-function label(str) {
-	const d = parseDate(str)
-	return d.getDate() + ' ' + MONTHS_SHORT[d.getMonth()]
 }
 
 // Grade de 6 semanas cobrindo o mês, começando no domingo
@@ -103,7 +95,7 @@ export default function DateRangePicker({ dates, from, to, onChange }) {
 				}}
 			>
 				<span>📅</span>
-				{label(dates[from])} <span style={{ color: '#888' }}>até</span> {label(dates[to])}
+				{dayLabel(dates[from])} <span style={{ color: '#888' }}>{t.to}</span> {dayLabel(dates[to])}
 			</button>
 
 			{open && (
@@ -126,7 +118,7 @@ export default function DateRangePicker({ dates, from, to, onChange }) {
 							‹
 						</NavButton>
 						<span style={{ fontSize: '12px', fontWeight: 500 }}>
-							{MONTHS[month]} {year}
+							{t.months[month]} {year}
 						</span>
 						<NavButton disabled={!canNext} onClick={() => setCursor(new Date(year, month + 1, 1))}>
 							›
@@ -134,7 +126,7 @@ export default function DateRangePicker({ dates, from, to, onChange }) {
 					</div>
 
 					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
-						{WEEKDAYS.map((w, i) => (
+						{t.weekdays.map((w, i) => (
 							<span key={i} style={{ fontSize: '10px', color: '#aaa', textAlign: 'center', padding: '2px 0' }}>
 								{w}
 							</span>
@@ -171,7 +163,7 @@ export default function DateRangePicker({ dates, from, to, onChange }) {
 					</div>
 
 					<p style={{ fontSize: '10px', color: '#888', marginTop: '8px' }}>
-						{pending == null ? 'Escolha a data inicial' : 'Escolha a data final'}
+						{pending == null ? t.pickStart : t.pickEnd}
 					</p>
 				</div>
 			)}

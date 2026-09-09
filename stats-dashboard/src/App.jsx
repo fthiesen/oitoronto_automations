@@ -3,36 +3,31 @@ import StatsChart from './StatsChart'
 import ComparisonBlock from './WeekBlock'
 import TagSignups from './TagSignups'
 import DateRangePicker from './DateRangePicker'
+import { t, num, dayLabel } from './i18n'
 
-const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
-
-export function shortLabel(dateStr) {
-	const parts = dateStr.split('-')
-	const day = parseInt(parts[2])
-	const month = parseInt(parts[1]) - 1
-	return day + ' ' + MONTHS[month]
-}
+// Reexportado: WeekBlock e StatsChart ja importavam shortLabel daqui.
+export const shortLabel = dayLabel
 
 export const METRICS = [
-	{ key: 'total', label: 'Total de membros', color: '#6B6A63', lineColor: '#888780', thick: true },
-	{ key: 'ativos', label: 'Membros ativos', color: '#1e9e00', lineColor: '#2bc700', thick: true },
+	{ key: 'total', label: t.metricTotal, color: '#6B6A63', lineColor: '#888780', thick: true },
+	{ key: 'ativos', label: t.metricActive, color: '#1e9e00', lineColor: '#2bc700', thick: true },
 	{
 		key: 'newsletters',
-		label: 'Membros em Newsletters',
+		label: t.metricNewsletters,
 		color: '#2D7FFF',
 		lineColor: '#2D7FFF',
 		thick: false,
 	},
 	{
 		key: 'integra',
-		label: 'Membros - Leitura na Íntegra',
+		label: t.metricIntegra,
 		color: '#6c63d1',
 		lineColor: '#7F77DD',
 		thick: false,
 	},
 	{
 		key: 'novidades',
-		label: 'Membros - Novidades do Blog',
+		label: t.metricNovidades,
 		color: '#9579c2',
 		lineColor: '#B19CD9',
 		thick: false,
@@ -55,11 +50,11 @@ export default function App() {
 				setFrom(sevenDaysAgoIndex)
 				setTo(lastIndex)
 			})
-			.catch(() => setError('Não foi possível carregar os dados.'))
+			.catch(() => setError(t.loadError))
 	}, [])
 
 	if (error) return <p style={{ color: '#e02b20', padding: '2rem' }}>{error}</p>
-	if (!data.length) return <p style={{ padding: '2rem', color: '#888' }}>Carregando...</p>
+	if (!data.length) return <p style={{ padding: '2rem', color: '#888' }}>{t.loading}</p>
 
 	const LEGACY_POSTS = 1605
 	const slice = data.slice(from, to + 1)
@@ -75,7 +70,7 @@ export default function App() {
 					<h1 style={{ fontSize: '18px', fontWeight: 500, marginBottom: '0.25rem' }}>
 						OiToronto Stats
 					</h1>
-					<p style={{ fontSize: '12px', color: '#888', marginBottom: '0.75rem' }}>Atualizado diariamente à meia-noite</p>
+					<p style={{ fontSize: '12px', color: '#888', marginBottom: '0.75rem' }}>{t.subtitle}</p>
 					<DateRangePicker
 						dates={data.map(d => d.date)}
 						from={from}
@@ -97,12 +92,12 @@ export default function App() {
 							flexShrink: 0,
 						}}
 					>
-						<p style={{ fontSize: '11px', margin: '0 0 4px', opacity: 0.9 }}>Posts publicados desde 2009</p>
+						<p style={{ fontSize: '11px', margin: '0 0 4px', opacity: 0.9 }}>{t.postsSince}</p>
 						<p style={{ fontSize: '18px', fontWeight: 600, margin: '0 0 3px' }}>
-							{totalPosts.toLocaleString('pt-BR')}
+							{num(totalPosts)}
 						</p>
 						<p style={{ fontSize: '11px', margin: 0, opacity: 0.7 }}>
-							1.605 (OiCanadá) + {ghostPosts.toLocaleString('pt-BR')}
+							{num(LEGACY_POSTS)} (OiCanadá) + {num(ghostPosts)}
 						</p>
 					</div>
 				)}

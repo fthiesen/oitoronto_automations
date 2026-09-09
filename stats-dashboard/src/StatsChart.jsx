@@ -10,6 +10,7 @@ import {
 	Tooltip,
 } from 'chart.js'
 import { shortLabel } from './App'
+import { t } from './i18n'
 
 Chart.register(
 	LineElement,
@@ -70,7 +71,7 @@ export default function StatsChart({ slice, metrics }) {
 
 	return (
 		<div style={{ position: 'relative', width: '100%', height: '240px', marginTop: '1rem' }}>
-			<canvas ref={ref} role='img' aria-label='Gráfico de linha com evolução diária' />
+			<canvas ref={ref} role='img' aria-label={t.chartAria} />
 		</div>
 	)
 }

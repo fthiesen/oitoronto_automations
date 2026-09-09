@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-
-const MONTHS_PT = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+import { t, num, tagName, monthLabel } from './i18n'
 
 const TAG_COLORS = {
 	'Imigração': '#b03a2e',
@@ -24,9 +23,16 @@ const TAG_COLORS = {
 	'N/A': '#909497',
 }
 
-function monthLabel(ym) {
-	const [y, m] = ym.split('-')
-	return `${MONTHS_PT[parseInt(m) - 1]} ${y}`
+// Antes do relancamento do blog nao havia post para atribuir a origem: todo cadastro
+// daquela epoca (incluindo a importacao de ~1.3k membros do OiCanada) cai em 'N/A' e so
+// polui a comparacao. O corte e o primeiro mes com atribuicao real, derivado dos dados --
+// assim nao ha data fixa no codigo para envelhecer.
+function firstAttributedMonth(signups) {
+	const meses = signups
+		.filter(e => Object.keys(e.tags).some(tag => tag !== 'N/A'))
+		.map(e => e.date.substring(0, 7))
+		.sort()
+	return meses[0] || null
 }
 
 export default function TagSignups() {
@@ -44,17 +50,23 @@ export default function TagSignups() {
 			.then(([signups, posts]) => {
 				setData(signups)
 				setPostsPerTag(posts)
-				const months = [...new Set(signups.map(e => e.date.substring(0, 7)))].sort()
+				const cut = firstAttributedMonth(signups)
+				const months = [...new Set(signups.map(e => e.date.substring(0, 7)))]
+					.filter(m => !cut || m >= cut)
+					.sort()
 				setFromMonth(months[0])
 				setToMonth(months[months.length - 1])
 			})
-			.catch(() => setError('Não foi possível carregar os dados de cadastros por tag.'))
+			.catch(() => setError(t.tagsError))
 	}, [])
 
 	if (error) return <p style={{ color: '#e02b20', fontSize: '12px' }}>{error}</p>
 	if (!data.length) return null
 
-	const months = [...new Set(data.map(e => e.date.substring(0, 7)))].sort()
+	const cut = firstAttributedMonth(data)
+	const months = [...new Set(data.map(e => e.date.substring(0, 7)))]
+		.filter(m => !cut || m >= cut)
+		.sort()
 
 	const filtered = data.filter(d => {
 		const m = d.date.substring(0, 7)
@@ -105,10 +117,10 @@ export default function TagSignups() {
 			>
 				<div>
 					<h2 style={{ fontSize: '15px', fontWeight: 500, margin: '0 0 0.25rem' }}>
-						Cadastros por tag
+						{t.tagsTitle}
 					</h2>
 					<p style={{ fontSize: '12px', color: '#888', margin: 0 }}>
-						Total no período: {total.toLocaleString('pt-BR')}
+						{t.tagsTotal}: {num(total)}
 					</p>
 				</div>
 				<div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -125,7 +137,7 @@ export default function TagSignups() {
 							</option>
 						))}
 					</select>
-					<span style={{ fontSize: '12px', color: '#888' }}>até</span>
+					<span style={{ fontSize: '12px', color: '#888' }}>{t.to}</span>
 					<select
 						value={toMonth}
 						onChange={e => {
@@ -169,27 +181,27 @@ export default function TagSignups() {
 								textOverflow: 'ellipsis',
 							}}
 						>
-							{tag}
+							{tagName(tag)}
 						</p>
 						{ratio !== null ? (
 							<>
 								<p style={{ fontSize: '18px', fontWeight: 600, margin: '0 0 2px' }}>
-									{ratio.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+									{ratio.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
 								</p>
 								<p style={{ fontSize: '11px', margin: '0 0 2px', opacity: 0.9 }}>
-									membros por post
+									{t.membersPerPost}
 								</p>
 								<p style={{ fontSize: '11px', margin: 0, opacity: 0.6 }}>
-									{signups} cadastros · {posts} posts
+									{signups} {t.signups} · {posts} {t.posts}
 								</p>
 							</>
 						) : (
 							<>
 								<p style={{ fontSize: '18px', fontWeight: 600, margin: '0 0 2px' }}>
-									{signups.toLocaleString('pt-BR')}
+									{num(signups)}
 								</p>
 								<p style={{ fontSize: '11px', margin: 0, opacity: 0.7 }}>
-									cadastros
+									{t.signups}
 								</p>
 							</>
 						)}
