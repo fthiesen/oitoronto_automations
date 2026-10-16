@@ -1,15 +1,16 @@
 {
+  "Lazer": 195,
+  "Notícia": 54,
   "Trabalho": 62,
+  "Experiência": 2,
   "Cinema": 18,
   "Restaurante": 1,
   "Paladar": 55,
   "Dinheiro": 47,
   "Saúde": 21,
   "Imigração": 45,
-  "Lazer": 194,
   "Música": 71,
   "Natureza": 6,
-  "Notícia": 53,
   "Transporte": 53,
   "Educação": 25,
   "Moradia": 40,
@@ -18,7 +19,6 @@
   "Turismo": 6,
   "Manchetes": 7,
   "Ponto Turístico": 2,
-  "Experiência": 1,
   "Cultura": 1,
   "Depoimento": 5
 }
