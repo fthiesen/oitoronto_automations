@@ -13,6 +13,12 @@ const SESSION = process.env.WAHA_SESSION || "default";
 const CHANNEL_ID = process.env.WAHA_CHANNEL_ID;
 const POSTS_SINCE = process.env.POSTS_SINCE; // ex: "2026-07-02" — ignora posts anteriores a essa data
 const TEST_MODE = process.argv.includes("--test"); // pega o último post e não marca a tag
+// Pré-aquecimento: envia o preview antes para um chat descartável (ex: grupo só do
+// bot, "...@g.us") e espera, para o WhatsApp processar a imagem nova. Sem isso, o
+// 1º envio de uma imagem ao canal às vezes sai com thumbnail pequeno. A mensagem de
+// aquecimento NÃO é apagada (o revoke pode quebrar a mídia em cache do canal).
+const WARM_CHAT = process.env.WAHA_WARM_CHAT;
+const WARM_DELAY_MS = Number(process.env.WAHA_WARM_DELAY_MS || 20000);
 
 function generateJWT(adminApiKey) {
   const [id, secret] = adminApiKey.split(":");
@@ -92,9 +98,22 @@ async function sendToChannel(post) {
     return;
   }
   // Com imagem: preview de link, com a imagem convertida para JPEG.
-  await wahaPost("send/link-custom-preview", {
+  if (WARM_CHAT) {
+    try {
+      await wahaPost("send/link-custom-preview", previewBody(WARM_CHAT, post));
+      await new Promise((r) => setTimeout(r, WARM_DELAY_MS));
+    } catch (e) {
+      // Aquecimento é opcional: se falhar (ex: grupo apagado), posta mesmo assim.
+      console.error("Aviso: aquecimento falhou, enviando sem ele:", e.message.slice(0, 200));
+    }
+  }
+  await wahaPost("send/link-custom-preview", previewBody(CHANNEL_ID, post));
+}
+
+function previewBody(chatId, post) {
+  return {
     session: SESSION,
-    chatId: CHANNEL_ID,
+    chatId,
     text: post.url,
     linkPreviewHighQuality: true,
     preview: {
@@ -103,7 +122,7 @@ async function sendToChannel(post) {
       description: buildDescription(post) || post.title,
       image: { url: toWhatsAppImage(post.feature_image) },
     },
-  });
+  };
 }
 
 async function markAsPosted(jwt, post) {
