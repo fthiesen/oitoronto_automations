@@ -8,7 +8,7 @@
  * Uso: node schedule-newsletter.js <post-id>
  *
  * O script:
- *   1. Le a GHOST_ADMIN_API_KEY de claude_desktop_config.json (ou env var)
+ *   1. Le a GHOST_ADMIN_API_KEY da env var ou do arquivo .env (via config.js)
  *   2. Busca o post pelo ID
  *   3. Adiciona a tag #ChamadasDoDia e define visibility = members
  *   4. Agenda o envio via newsletter "chamadas-do-dia" para hoje as 07:10 ET
