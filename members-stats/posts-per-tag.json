@@ -1,5 +1,6 @@
 {
-  "Lazer": 200,
+  "Lazer": 201,
+  "Dinheiro": 48,
   "Paladar": 57,
   "Música": 73,
   "Transporte": 55,
@@ -10,7 +11,6 @@
   "Trabalho": 62,
   "Cinema": 18,
   "Restaurante": 1,
-  "Dinheiro": 47,
   "Saúde": 21,
   "Natureza": 6,
   "Educação": 25,
