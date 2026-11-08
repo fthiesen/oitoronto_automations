@@ -1,7 +1,8 @@
 // post-link.js
-// Busca o post mais antigo sem a tag #whatsapp-posted e envia ao canal do WhatsApp
-// como preview de link (imagem + título + descrição, tudo do Ghost).
-// Depois de enviar, adiciona a tag ao post no Ghost para não repostar.
+// Busca todos os posts sem a tag #whatsapp-posted e envia cada um ao canal do
+// WhatsApp como preview de link (imagem + título + descrição, tudo do Ghost), do
+// mais antigo para o mais novo. Depois de cada envio, adiciona a tag ao post no
+// Ghost para não repostar.
 
 const crypto = require("crypto");
 
@@ -28,9 +29,10 @@ function generateJWT(adminApiKey) {
   return `${toSign}.${sig}`;
 }
 
-async function fetchNextPost(jwt) {
-  // Modo teste: pega o post mais recente, sem filtrar tag nem POSTS_SINCE.
-  // Produção: pega o mais antigo ainda sem a tag, desde POSTS_SINCE.
+async function fetchPendingPosts(jwt) {
+  // Modo teste: só o post mais recente, sem filtrar tag nem POSTS_SINCE.
+  // Produção: todos os posts ainda sem a tag, desde POSTS_SINCE, do mais antigo
+  // para o mais novo (ordem cronológica no canal).
   const filters = TEST_MODE
     ? ["status:published"]
     : [
@@ -38,16 +40,15 @@ async function fetchNextPost(jwt) {
         "tag:-hash-whatsapp-posted",
         ...(POSTS_SINCE ? [`published_at:>='${POSTS_SINCE}'`] : []),
       ];
-  const order = TEST_MODE ? "desc" : "asc";
   const url =
     `${GHOST_URL}/ghost/api/admin/posts/` +
-    `?limit=1&order=published_at%20${order}` +
+    `?limit=${TEST_MODE ? 1 : "all"}&order=published_at%20${TEST_MODE ? "desc" : "asc"}` +
     `&filter=${encodeURIComponent(filters.join("+"))}` +
     `&include=tags`;
   const res = await fetch(url, { headers: { Authorization: `Ghost ${jwt}` } });
   if (!res.ok) throw new Error(`Ghost API retornou ${res.status}: ${await res.text()}`);
   const { posts } = await res.json();
-  return posts[0] || null;
+  return posts;
 }
 
 function buildDescription(post) {
@@ -128,23 +129,29 @@ async function main() {
     throw new Error("Faltam variáveis: GHOST_ADMIN_API_KEY, WAHA_URL e/ou WAHA_CHANNEL_ID");
   }
 
-  const jwt = generateJWT(GHOST_ADMIN_API_KEY);
-  const post = await fetchNextPost(jwt);
+  const posts = await fetchPendingPosts(generateJWT(GHOST_ADMIN_API_KEY));
 
-  if (!post) {
+  if (posts.length === 0) {
     console.log("Nenhum post novo para postar.");
     return;
   }
 
-  await sendToChannel(post);
+  for (const [i, post] of posts.entries()) {
+    // Pequena pausa entre envios para não mandar uma rajada ao canal.
+    if (i > 0) await new Promise((r) => setTimeout(r, 5000));
 
-  if (TEST_MODE) {
-    console.log(`[TESTE] Enviado (sem marcar tag): ${post.title} — ${post.url}`);
-    return;
+    await sendToChannel(post);
+
+    if (TEST_MODE) {
+      console.log(`[TESTE] Enviado (sem marcar tag): ${post.title} — ${post.url}`);
+      continue;
+    }
+
+    console.log(`Postado: ${post.title} — ${post.url}`);
+    // Marca logo após cada envio (JWT novo: o token expira em 5 min). Se algo
+    // falhar no meio, os posts já enviados ficam marcados e o resto vai na próxima.
+    await markAsPosted(generateJWT(GHOST_ADMIN_API_KEY), post);
   }
-
-  console.log(`Postado: ${post.title} — ${post.url}`);
-  await markAsPosted(jwt, post);
 }
 
 if (require.main === module) {
