@@ -124,7 +124,28 @@ async function markAsPosted(jwt, post) {
   if (!res.ok) throw new Error(`Falha ao marcar post no Ghost (${res.status}): ${await res.text()}`);
 }
 
+// O cron do Railway roda em UTC, duas vezes por slot (uma vale no horário de
+// verão, a outra no inverno). Só publica quando a hora em Toronto é a do slot.
+const SLOT_HOURS = [7, 10, 13, 16, 19, 22];
+const FORCE = process.argv.includes("--force"); // publica fora do horário (uso manual)
+
+function torontoHour(date = new Date()) {
+  return Number(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Toronto",
+      hour: "numeric",
+      hourCycle: "h23",
+    }).format(date)
+  );
+}
+
 async function main() {
+  const hour = torontoHour();
+  if (!TEST_MODE && !FORCE && !SLOT_HOURS.includes(hour)) {
+    console.log(`Fora do horário (${hour}h em Toronto). Nada a fazer.`);
+    return;
+  }
+
   if (!GHOST_ADMIN_API_KEY || !WAHA_URL || !CHANNEL_ID) {
     throw new Error("Faltam variáveis: GHOST_ADMIN_API_KEY, WAHA_URL e/ou WAHA_CHANNEL_ID");
   }
@@ -161,4 +182,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { generateJWT, sendToChannel, wahaPost, toWhatsAppImage };
+module.exports = { generateJWT, sendToChannel, wahaPost, toWhatsAppImage, torontoHour, SLOT_HOURS };
